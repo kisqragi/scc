@@ -1,3 +1,5 @@
+#define _POSIX_C_SOURCE 200809L
+
 #include <assert.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -38,6 +40,25 @@ Token *tokenize(char *input);
 //
 // parse.c
 //
+//
+
+typedef struct Node Node;
+
+// Local variable
+typedef struct Obj Obj;
+struct Obj {
+    Obj *next;
+    char *name; // Variable name
+    int offset; // Offset from RBP
+};
+
+// Function
+typedef struct Function Function;
+struct Function {
+    Node *body;
+    Obj *locals;
+    int stack_size;
+};
 
 typedef enum {
     ND_ADD,
@@ -56,20 +77,19 @@ typedef enum {
 } NodeKind;
 
 // AST node type
-typedef struct Node Node;
 struct Node {
     NodeKind kind;
     Node *next;
     Node *lhs;
     Node *rhs;
-    char name;  // Used if kind == ND_VAR
+    Obj *var;   // Used if kind == ND_VAR
     int val;    // Used if kind == ND_NUM
 };
 
-extern Node *parse(Token *tok);
+Function *parse(Token *tok);
 
 //
 // codegen.c
 //
 
-void codegen(Node *node);
+void codegen(Function *prog);
