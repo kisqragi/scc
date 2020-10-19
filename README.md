@@ -4,11 +4,12 @@
 program    = stmt*
 stmt       = expr-stmt
 expr-stmt  = expr ";"
-expr       = equality
+expr       = assign
+assign     = equality ("=" assign)?
 equality   = relational ("==" relational | "!=" relational)*
 relational = add ("<" add | "<=" add | ">" add | ">=" add)*
 add        = mul ("+" mul | "-" mul)*
 mul        = unary ("*" unary | "/" unary)*
 unary      = ("+" | "-") unary | primary
-primary    = "(" expr ")" | num
+primary    = "(" expr ")" | ident | num
 ```

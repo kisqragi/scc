@@ -1,5 +1,3 @@
-#pragma once
-
 #include <assert.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -13,6 +11,7 @@
 //
 
 typedef enum {
+    TK_IDENT,
     TK_PUNCT,
     TK_NUM,
     TK_EOF,
@@ -50,7 +49,9 @@ typedef enum {
     ND_NE,
     ND_LT,
     ND_LE,
+    ND_ASSIGN,
     ND_EXPR_STMT,
+    ND_VAR,
     ND_NUM,
 } NodeKind;
 
@@ -61,7 +62,8 @@ struct Node {
     Node *next;
     Node *lhs;
     Node *rhs;
-    int val;
+    char name;  // Used if kind == ND_VAR
+    int val;    // Used if kind == ND_NUM
 };
 
 extern Node *parse(Token *tok);
