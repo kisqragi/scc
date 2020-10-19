@@ -2,7 +2,8 @@
 
 ```
 program    = stmt*
-stmt       = expr-stmt
+stmt       = "return" expr ";"
+           | expr-stmt
 expr-stmt  = expr ";"
 expr       = assign
 assign     = equality ("=" assign)?
