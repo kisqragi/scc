@@ -50,6 +50,7 @@ static Node *expr_stmt(Token **rest, Token *tok) {
 static Node *expr(Token **rest, Token *tok) {
     return equality(rest, tok);
 }
+
 // equality = relational ("==" relational | "!=" relational)*
 static Node *equality(Token **rest, Token *tok) {
     Node *node = relational(&tok, tok);
