@@ -1,3 +1,5 @@
+#pragma once
+
 #include <assert.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -62,7 +64,7 @@ struct Node {
     int val;
 };
 
-Node *parse(Token *tok);
+extern Node *parse(Token *tok);
 
 //
 // codegen.c

@@ -3,9 +3,9 @@ assert() {
   expected="$1"
   input="$2"
 
-  ./scc "$input" > tmp.s || exit
-  gcc -static -o tmp tmp.s
-  ./tmp
+  ./bin/scc "$input" > ./bin/tmp.s || exit
+  gcc -static -o ./bin/tmp ./bin/tmp.s
+  ./bin/tmp
   actual="$?"
 
   if [ "$actual" = "$expected" ]; then

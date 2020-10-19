@@ -1,16 +1,24 @@
 CFLAGS=-std=c11 -g -fno-common
-SRCS=$(wildcard *.c)
-OBJS=$(SRCS:.c=.o)
+TARGET    = ./bin/scc
+TARDIR    = ./bin
+SRCDIR    = ./src
+SOURCES   = $(wildcard $(SRCDIR)/*.c)
+OBJDIR    = ./obj
+OBJECTS   = $(addprefix $(OBJDIR)/, $(notdir $(SOURCES:.c=.o)))
 
-scc: $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+$(TARGET): $(OBJECTS)
+	$(CC) -o $@ $^ $(LDFLAGS)
 
-$(OBJS): scc.h
+$(OBJDIR)/%.o: $(SRCDIR)/%.c $(SRCDIR)/scc.h
+	-mkdir -p $(OBJDIR)
+	$(CC) $(CFLAGS) -o $@ -c $<
 
-test: scc 
+all: clean $(TARGET)
+
+test: $(TARGET)
 	./test.sh
 
 clean:
-	rm -f scc *.o *~ tmp*
+	-rm -f $(OBJECTS) $(TARDIR)/*
 
-.PHONY: test clean
+.PHONY: test clean all
