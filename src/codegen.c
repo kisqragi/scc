@@ -104,31 +104,31 @@ static void gen_stmt(Node *node) {
             int c = count();
             gen_expr(node->cond);
             printf("    cmp $0, %%rax\n");
-            printf("    je .L.else.%d\n", c);
+            printf("    je .L.if.else.%d\n", c);
             gen_stmt(node->then);
-            printf("    jmp .L.end.%d\n", c);
-            printf(".L.else.%d:\n", c);
+            printf("    jmp .L.if.end.%d\n", c);
+            printf(".L.if.else.%d:\n", c);
             if (node->els)
                 gen_stmt(node->els);
-            printf(".L.end.%d:\n", c);
+            printf(".L.if.end.%d:\n", c);
             return;
         }
         case ND_FOR: {
             int c = count();
             if (node->init)
                 gen_stmt(node->init);
-            printf(".L.begin.%d:\n", c);
+            printf(".L.for.begin.%d:\n", c);
             if (node->cond) {
                 gen_expr(node->cond);
                 printf("    cmp $0, %%rax\n");
-                printf("    je .L.end.%d\n", c);
+                printf("    je .L.for.end.%d\n", c);
             }
             gen_stmt(node->then);
             if (node->inc) {
                 gen_expr(node->inc);
             }
-            printf("    jmp .L.begin.%d\n", c);
-            printf(".L.end.%d:\n", c);
+            printf("    jmp .L.for.begin.%d\n", c);
+            printf(".L.for.end.%d:\n", c);
             return;
         }
         case ND_BLOCK:
