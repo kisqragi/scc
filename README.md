@@ -6,7 +6,7 @@ stmt          = "return" expr ";"
               | "{" compound-stmt
               | expr-stmt
 compound-stmt = stmt* "}"
-expr-stmt     = expr ";"
+expr-stmt     = expr? ";"
 expr          = assign
 assign        = equality ("=" assign)?
 equality      = relational ("==" relational | "!=" relational)*
