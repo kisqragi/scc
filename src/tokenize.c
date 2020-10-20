@@ -87,9 +87,20 @@ static int read_punct(char *p) {
     return ispunct(*p) ? 1 : 0;
 }
 
+static bool is_keyword(Token *tok) {
+    static char *kw[] = {"return", "if", "else"};
+
+    for (int i = 0; i < sizeof(kw) / sizeof(kw[0]); i++) {
+        if (equal(tok, kw[i]))
+            return true;
+    }
+
+    return false;
+}
+
 static void convert_keywords(Token *tok) {
     for (Token *t = tok; t; t = t->next) {
-        if (equal(t, "return"))
+        if (is_keyword(t))
             t->kind = TK_KEYWORD;
     }
 }

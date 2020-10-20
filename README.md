@@ -3,6 +3,7 @@
 ```
 program       = stmt*
 stmt          = "return" expr ";"
+              | "if" "(" expr ")" stmt ("else" stmt)?
               | "{" compound-stmt
               | expr-stmt
 compound-stmt = stmt* "}"
