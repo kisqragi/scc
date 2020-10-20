@@ -78,4 +78,8 @@ assert 3 '{ if (0) return 1; else if (0) return 2; return 3; }'
 assert 45 '{ i;j=0; for(i=0;i<10;i=i+1) { j=j+i; } return j; }'
 assert 3 '{ i=0; for (;;) { if (i>2) return i; i=i+1; } return 0; }'
 
+assert 55 '{ i=0;j=0; while(i<10) { i=i+1; j=j+i; } return j; }'
+assert 3 '{ i=0; while (1) { if (i>2) return i; i=i+1; } return 0; }'
+
+
 echo OK
