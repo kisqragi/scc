@@ -8,6 +8,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef struct Node Node;
+typedef struct Type Type;
+
+
 //
 // tokenize.c
 //
@@ -42,8 +46,6 @@ Token *tokenize(char *input);
 // parse.c
 //
 //
-
-typedef struct Node Node;
 
 // Local variable
 typedef struct Obj Obj;
@@ -87,7 +89,8 @@ typedef enum {
 struct Node {
     NodeKind kind;
     Node *next;
-    Token *tok;  // Representative token
+    Type *ty;   // Type, e.g. int or pointer to int
+    Token *tok; // Representative token
 
     Node *lhs;
     Node *rhs;
@@ -113,3 +116,23 @@ Function *parse(Token *tok);
 //
 
 void codegen(Function *prog);
+
+//
+// type.c
+//
+
+typedef enum  {
+    TY_INT,
+    TY_PTR,
+} TypeKind;
+
+struct Type {
+    TypeKind kind;
+    Type *base;
+};
+
+extern Type *ty_int;
+
+bool is_integer(Type *ty);
+bool is_pointer(Type *ty);
+void add_type(Node *node);
