@@ -81,5 +81,12 @@ assert 3 '{ i=0; for (;;) { if (i>2) return i; i=i+1; } return 0; }'
 assert 55 '{ i=0;j=0; while(i<10) { i=i+1; j=j+i; } return j; }'
 assert 3 '{ i=0; while (1) { if (i>2) return i; i=i+1; } return 0; }'
 
+assert 1 '{ x=1; return *&x; }'
+assert 1 '{ x=1; y=&x; z=&y; return **z; }'
+assert 2 '{ x=1; y=2; return *(&x+8); }'
+assert 1 '{ x=1; y=2; return *(&y-8); }'
+assert 5 '{ x=3; y=&x; *y=5; return x; }'
+assert 5 '{ x=1; y=2; *(&x+8)=5; return y; }'
+assert 5 '{ x=1; y=2; *(&y-8)=5; return x; }'
 
 echo OK

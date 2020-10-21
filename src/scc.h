@@ -66,16 +66,18 @@ typedef enum {
     ND_SUB,
     ND_MUL,
     ND_DIV,
-    ND_NEG, // unary -
+    ND_NEG,         // unary -
     ND_EQ,
     ND_NE,
     ND_LT,
     ND_LE,
     ND_ASSIGN,
+    ND_ADDR,        // unary &
+    ND_DEREF,       // unary *
     ND_RETURN,
     ND_IF,
-    ND_FOR,     // "for" or "while"
-    ND_BLOCK,   // {...}
+    ND_FOR,         // "for" or "while"
+    ND_BLOCK,       // {...}
     ND_EXPR_STMT,
     ND_VAR,
     ND_NUM,
