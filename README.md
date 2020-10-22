@@ -8,7 +8,10 @@ stmt          = "return" expr ";"
               | "while" "(" expr ")" stmt
               | "{" compound-stmt
               | expr-stmt
-compound-stmt = stmt* "}"
+compound-stmt = (declaration | stmt)* "}"
+declaration   = typespec (declarator ("=" expr)? ("," declarator ("=" expr)?)*)? ";"
+declarator    = "*"* ident
+typespec      = "int"
 expr-stmt     = expr? ";"
 expr          = assign
 assign        = equality ("=" assign)?
