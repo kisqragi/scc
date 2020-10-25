@@ -1,7 +1,7 @@
 # scc is small C compiler
 
 ```
-program       = stmt*
+program       = function-definition*
 stmt          = "return" expr ";"
               | "if" "(" expr ")" stmt ("else" stmt)?
               | "for" "(" expr-stmt expr? ";" expr? ")" stmt
@@ -9,9 +9,10 @@ stmt          = "return" expr ";"
               | "{" compound-stmt
               | expr-stmt
 compound-stmt = (declaration | stmt)* "}"
-declaration   = typespec (declarator ("=" expr)? ("," declarator ("=" expr)?)*)? ";"
-declarator    = "*"* ident
-typespec      = "int"
+declaration   = declspec (declarator ("=" expr)? ("," declarator ("=" expr)?)*)? ";"
+declarator    = "*"* ident type-suffix
+type-suffix   = ("(" func-params?)?
+declspec      = "int"
 expr-stmt     = expr? ";"
 expr          = assign
 assign        = equality ("=" assign)?

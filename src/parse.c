@@ -80,13 +80,24 @@ static char *get_ident(Token *tok) {
     return strndup(tok->loc, tok->len);
 }
 
-// typespec = "int"
-static Type *typespec(Token **rest, Token *tok) {
+// declspec = "int"
+static Type *declspec(Token **rest, Token *tok) {
     *rest = skip(tok, "int");
     return ty_int;
 }
 
-// declarator = "*"* ident
+// type-suffix = ("(" func-params?)?
+static Type *type_suffix(Token **rest, Token *tok, Type *ty) {
+    if (equal(tok, "(")) {
+        *rest = skip(tok->next, ")");
+        return func_type(ty);
+    }
+
+    *rest = tok;
+    return ty;
+}
+
+// declarator = "*"* ident type-suffix
 static Type *declarator(Token **rest, Token *tok, Type *ty) {
     while (consume(&tok, tok, "*"))
         ty = pointer_to(ty);
@@ -94,14 +105,14 @@ static Type *declarator(Token **rest, Token *tok, Type *ty) {
     if (tok->kind != TK_IDENT)
         error_tok(tok, "expected a variable name");
 
+    ty = type_suffix(rest, tok->next, ty);
     ty->name = tok;
-    *rest = tok->next;
     return ty;
 }
 
-// declaration = typespec (declarator ("=" expr)? ("," declarator ("=" expr)?)*)? ";"
+// declaration = declspec (declarator ("=" expr)? ("," declarator ("=" expr)?)*)? ";"
 static Node *declaration(Token **rest, Token *tok) {
-    Type *basety = typespec(&tok, tok);
+    Type *basety = declspec(&tok, tok);
 
     Node head = {};
     Node *cur = &head;
@@ -468,11 +479,27 @@ static Node *primary(Token **rest, Token *tok) {
     error_tok(tok, "expected an expression");
 }
 
-// program = stmt*
-Function *parse(Token *tok) {
+static Function *funcdef(Token **rest, Token *tok) {
+    Type *ty = declspec(&tok, tok);
+    ty = declarator(&tok, tok, ty);
+
+    locals = NULL;
+
+    Function *fn = calloc(1, sizeof(Function));
+    fn->name = get_ident(ty->name);
+
     tok = skip(tok, "{");
-    Function *prog = calloc(1, sizeof(Function));
-    prog->body = compound_stmt(&tok, tok);
-    prog->locals = locals;
-    return prog;
+    fn->body = compound_stmt(rest, tok);
+    fn->locals = locals;
+    return fn;
+}
+
+// program = function-definition*
+Function *parse(Token *tok) {
+    Function head = {};
+    Function *cur = &head;
+
+    while (tok->kind != TK_EOF)
+        cur = cur->next = funcdef(&tok, tok);
+    return head.next;
 }

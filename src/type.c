@@ -1,4 +1,5 @@
 #include "scc.h"
+#include <stdlib.h>
 
 Type *ty_int = &(Type){TY_INT};
 
@@ -14,6 +15,13 @@ Type *pointer_to(Type *base) {
     Type *ty = calloc(1, sizeof(Type));
     ty->kind = TY_PTR;
     ty->base = base;
+    return ty;
+}
+
+Type *func_type(Type *return_ty) {
+    Type *ty = calloc(1, sizeof(Type));
+    ty->kind = TY_FUNC;
+    ty->return_ty = return_ty;
     return ty;
 }
 
