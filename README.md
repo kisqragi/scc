@@ -20,6 +20,6 @@ relational    = add ("<" add | "<=" add | ">" add | ">=" add)*
 add           = mul ("+" mul | "-" mul)*
 mul           = unary ("*" unary | "/" unary)*
 unary         = ("+" | "-" | "&" | "*") unary
-primary       = "(" expr ")" | ident args? | num
-args          = "(" ")"
+funcall       = ident "(" (assign ("," assign)*)? ")"
+primary       = "(" expr ")" | funcall | ident | num
 ```
