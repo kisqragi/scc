@@ -115,4 +115,8 @@ assert 136 'int main() { return add6(1,2,add6(3,add6(4,5,6,7,8,9),10,11,12,13),1
 
 assert 10 'int main() { return ret10(); } int ret10() { return 10; }'
 
+assert 7 'int main() { return _add(3,4); } int _add(int x, int y) { return x+y; }'
+assert 1 'int main() { return _sub(4,3); } int _sub(int x, int y) { return x-y; }'
+assert 55 'int main() { return fib(9); } int fib(int x) { if (x<=1) return 1; return fib(x-1) + fib(x-2); }'
+
 echo OK
