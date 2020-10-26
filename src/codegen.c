@@ -28,6 +28,20 @@ static int align_to(int n, int align) {
     return (n + align - 1) / align * align;
 }
 
+// Load a value from where %rax is pointing to.
+static void load(Type *ty) {
+    if (ty->kind == TY_ARRAY) {
+        return;
+    }
+    printf("    mov (%%rax), %%rax\n");
+}
+
+// Store %rax to an address that the stack top is pointing to.
+static void store(void) {
+    pop("%rdi");
+    printf("    mov %%rax, (%%rdi)\n");
+}
+
 static void gen_addr(Node *node) {
     switch (node->kind) {
         case ND_VAR:
@@ -52,11 +66,11 @@ static void gen_expr(Node *node) {
             return;
         case ND_VAR:
             gen_addr(node);
-            printf("    mov (%%rax), %%rax\n");
+            load(node->ty);
             return;
         case ND_DEREF:
             gen_expr(node->lhs);
-            printf("    mov (%%rax), %%rax\n");
+            load(node->ty);
             return;
         case ND_ADDR:
             gen_addr(node->lhs);
@@ -65,8 +79,7 @@ static void gen_expr(Node *node) {
             gen_addr(node->lhs);
             push();
             gen_expr(node->rhs);
-            pop("%rdi");
-            printf("    mov %%rax, (%%rdi)\n");
+            store();
             return;
         case ND_FUNCALL: {
             int nargs = 0;
@@ -181,7 +194,7 @@ static void assign_lvar_offset(Function *prog) {
     for (Function *fn = prog; fn; fn = fn->next) {
         int offset = 0;
         for (Obj *var = fn->locals; var; var = var->next) {
-            offset += 8;
+            offset += var->ty->size;
             var->offset = offset;
         }
         fn->stack_size = align_to(offset, 16);

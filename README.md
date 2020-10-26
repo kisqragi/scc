@@ -10,11 +10,13 @@ stmt          = "return" expr ";"
               | expr-stmt
 compound-stmt = (declaration | stmt)* "}"
 declaration   = declspec (declarator ("=" expr)? ("," declarator ("=" expr)?)*)? ";"
-declarator    = "*"* ident type-suffix
-type-suffix   = ("(" func-params? ")")?
-func-params   = param ("," param)*
+type-suffix   = "(" func-params
+              | "[" num "]"
+              | ε
+func-params   = (param ("," param)*)*)? ")"
 param         = declspec declarator
 declspec      = "int"
+declarator    = "*"* ident type-suffix
 expr-stmt     = expr? ";"
 expr          = assign
 assign        = equality ("=" assign)?
