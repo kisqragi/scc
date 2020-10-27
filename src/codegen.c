@@ -216,8 +216,8 @@ static void emit_data(Obj *prog) {
         if (var->is_function)
             continue;
 
-        printf(".data\n");
-        printf(".globl %s\n", var->name);
+        printf("    .data\n");
+        printf("    .globl %s\n", var->name);
         printf("%s:\n", var->name);
         printf("    .zero %d\n", var->ty->size);
     }
@@ -229,8 +229,8 @@ static void emit_text(Obj *prog) {
         if (!fn->is_function)
             continue;
 
-        printf(".globl %s\n", fn->name);
-        printf(".text\n");
+        printf("    .globl %s\n", fn->name);
+        printf("    .text\n");
         printf("%s:\n", fn->name);
         current_fn = fn;
 
