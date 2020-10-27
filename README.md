@@ -11,7 +11,7 @@ stmt          = "return" expr ";"
 compound-stmt = (declaration | stmt)* "}"
 declaration   = declspec (declarator ("=" expr)? ("," declarator ("=" expr)?)*)? ";"
 type-suffix   = "(" func-params
-              | "[" num "]"
+              | "[" num "]" type-suffix
               | ε
 func-params   = (param ("," param)*)*)? ")"
 param         = declspec declarator
