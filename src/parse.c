@@ -439,6 +439,7 @@ static Node *mul(Token **rest, Token *tok) {
 }
 
 // unary = ("+" | "-" | "&" | "*") unary
+//       | "sizeof" unary
 //       | postfix
 static Node *unary(Token **rest, Token *tok) {
 
@@ -453,6 +454,12 @@ static Node *unary(Token **rest, Token *tok) {
 
     if (equal(tok, "*"))
         return new_unary(ND_DEREF, unary(rest, tok->next), tok);
+
+    if (equal(tok, "sizeof")) {
+        Node *node = unary(rest, tok->next);
+        add_type(node);
+        return new_num(node->ty->size, tok);
+    }
 
     return postfix(rest, tok);
 }
