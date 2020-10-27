@@ -25,6 +25,8 @@ relational    = add ("<" add | "<=" add | ">" add | ">=" add)*
 add           = mul ("+" mul | "-" mul)*
 mul           = unary ("*" unary | "/" unary)*
 unary         = ("+" | "-" | "&" | "*") unary
+              | postfix
+postfix       = primary ("[" expr "]")*
 funcall       = ident "(" (assign ("," assign)*)? ")"
 primary       = "(" expr ")" | funcall | ident | num
 ```

@@ -18,6 +18,7 @@ static Node *relational(Token **rest, Token *tok);
 static Node *add(Token **rest, Token *tok);
 static Node *mul(Token **rest, Token *tok);
 static Node *unary(Token **rest, Token *tok);
+static Node *postfix(Token **rest, Token *tok);
 static Node *primary(Token **rest, Token *tok);
 
 // find a local variable by name.
@@ -351,11 +352,11 @@ static Node *new_add(Node *lhs, Node *rhs, Token *tok) {
         return new_binary(ND_ADD, lhs, rhs, tok);
 
     // ptr + ptr
-    if (is_pointer(lhs->ty) && is_pointer(rhs->ty))
+    if (lhs->ty->base && rhs->ty->base)
         error_tok(tok, "invalid operands");
 
     // Canonicalize `num + ptr` to `ptr + num`
-    if  (is_integer(lhs->ty) && is_pointer(rhs->ty)) {
+    if (!lhs->ty->base && rhs->ty->base) {
         Node *tmp = lhs;
         lhs = rhs;
         rhs = tmp;
@@ -375,7 +376,7 @@ static Node *new_sub(Node *lhs, Node *rhs, Token *tok) {
         return new_binary(ND_SUB, lhs, rhs, tok);
 
     // ptr - num
-    if (is_pointer(lhs->ty) && is_integer(rhs->ty)) {
+    if (lhs->ty->base && is_integer(rhs->ty)) {
         rhs = new_binary(ND_MUL, rhs, new_num(lhs->ty->base->size, tok), tok);
         return new_binary(ND_SUB, lhs, rhs, tok);
         //add_type(rhs);
@@ -385,7 +386,7 @@ static Node *new_sub(Node *lhs, Node *rhs, Token *tok) {
     }
 
     // num - ptr
-    if (is_integer(lhs->ty) && is_pointer(rhs->ty))
+    if (is_integer(lhs->ty) && lhs->ty->base)
         error_tok(tok, "invalid operands");
 
     // ptr - ptr, which returns how many elements are between the two.
@@ -438,7 +439,7 @@ static Node *mul(Token **rest, Token *tok) {
 }
 
 // unary = ("+" | "-" | "&" | "*") unary
-//       | primary
+//       | postfix
 static Node *unary(Token **rest, Token *tok) {
 
     if (equal(tok, "+"))
@@ -453,7 +454,22 @@ static Node *unary(Token **rest, Token *tok) {
     if (equal(tok, "*"))
         return new_unary(ND_DEREF, unary(rest, tok->next), tok);
 
-    return primary(rest, tok);
+    return postfix(rest, tok);
+}
+
+// postfix = primary ("[" expr "]")*
+static Node *postfix(Token **rest, Token *tok) {
+    Node *node = primary(&tok, tok);
+
+    while (equal(tok, "[")) {
+        // x[y] is short for *(x+y)
+        Token *start = tok;
+        Node *idx = expr(&tok, tok->next);
+        tok = skip(tok, "]");
+        node = new_unary(ND_DEREF, new_add(node, idx, start), start);
+    }
+    *rest = tok;
+    return node;
 }
 
 // funcall = ident "(" (assign ("," assign)*)? ")"
