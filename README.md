@@ -1,7 +1,7 @@
 # scc is small C compiler
 
 ```
-program       = function-definition*
+program       = (function-definition | global-variable)*
 stmt          = "return" expr ";"
               | "if" "(" expr ")" stmt ("else" stmt)?
               | "for" "(" expr-stmt expr? ";" expr? ")" stmt

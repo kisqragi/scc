@@ -4,7 +4,8 @@
 #include <string.h>
 
 // All local variable instances created during parsing are accumulated to this list.
-Obj *locals;
+static Obj *locals;
+static Obj *globals;
 
 static Type *declarator(Token **rest, Token *tok, Type *ty);
 static Node *declaration(Token **rest, Token *tok);
@@ -62,12 +63,25 @@ static Node *new_var_node(Obj *var, Token *tok) {
     return node;
 }
 
-static Obj *new_lvar(char *name, Type *ty) {
+static Obj *new_var(char *name, Type *ty) {
     Obj *var = calloc(1, sizeof(Obj));
     var->name = name;
     var->ty = ty;
+    return var;
+}
+
+static Obj *new_lvar(char *name, Type *ty) {
+    Obj *var = new_var(name, ty);
+    var->is_local = true;
     var->next = locals;
     locals = var;
+    return var;
+}
+
+static Obj *new_gvar(char *name, Type *ty) {
+    Obj *var = new_var(name, ty);
+    var->next = globals;
+    globals = var;
     return var;
 }
 
@@ -538,29 +552,30 @@ static void create_param_lvars(Type *param) {
     }
 }
 
-static Function *funcdef(Token **rest, Token *tok) {
-    Type *ty = declspec(&tok, tok);
-    ty = declarator(&tok, tok, ty);
+static Token *funcdef(Token *tok, Type *basety) {
+    Type *ty = declarator(&tok, tok, basety);
+
+    Obj *fn = new_gvar(get_ident(ty->name), ty);
+    fn->is_function = true;
 
     locals = NULL;
 
-    Function *fn = calloc(1, sizeof(Function));
-    fn->name = get_ident(ty->name);
     create_param_lvars(ty->params);
     fn->params = locals;
 
     tok = skip(tok, "{");
-    fn->body = compound_stmt(rest, tok);
+    fn->body = compound_stmt(&tok, tok);
     fn->locals = locals;
-    return fn;
+    return tok;
 }
 
-// program = function-definition*
-Function *parse(Token *tok) {
-    Function head = {};
-    Function *cur = &head;
+// program = (function-definition | global-variable)*
+Obj *parse(Token *tok) {
+    globals = NULL;
 
-    while (tok->kind != TK_EOF)
-        cur = cur->next = funcdef(&tok, tok);
-    return head.next;
+    while (tok->kind != TK_EOF) {
+        Type *basety = declspec(&tok, tok);
+        tok = funcdef(tok, basety);
+    }
+    return globals;
 }
