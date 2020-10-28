@@ -15,7 +15,7 @@ type-suffix   = "(" func-params
               | ε
 func-params   = (param ("," param)*)*)? ")"
 param         = declspec declarator
-declspec      = "int"
+declspec      = "char" | "int"
 declarator    = "*"* ident type-suffix
 expr-stmt     = expr? ";"
 expr          = assign
