@@ -135,6 +135,12 @@ Obj *parse(Token *tok);
 void codegen(Obj *prog);
 
 //
+// strings.c
+//
+
+char *format(char *fmt, ...);
+
+//
 // type.c
 //
 
