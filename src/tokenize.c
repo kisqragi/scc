@@ -115,7 +115,25 @@ static void convert_keywords(Token *tok) {
     }
 }
 
-static char read_escaped_char(char *p) {
+static bool is_octal_range(char *p) {
+    return ('0' <= *p && *p <= '7');
+}
+
+static char read_escaped_char(char *p, char **endptr) {
+    // octal number
+    if (is_octal_range(p)) {
+        int n = *p++ - '0';
+        if (is_octal_range(p)) {
+            n = (n << 3) + (*p++ - '0');
+            if (is_octal_range(p)) {
+                n = (n << 3) + (*p++ - '0');
+            }
+        }
+        *endptr = p;
+        return n;
+    }
+
+    *endptr = p + 1;
     switch (*p) {
         case 'a': return  '\a';
         case 'b': return  '\b';
@@ -148,8 +166,7 @@ static Token *read_string_literal(char *start) {
 
     for (char *p = start + 1; p < end;) {
         if (*p == '\\') {
-            buf[len++] = read_escaped_char(p + 1);
-            p += 2;
+            buf[len++] = read_escaped_char(p + 1, &p);
         } else {
             buf[len++] = *p++;
         }
