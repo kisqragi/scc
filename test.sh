@@ -226,6 +226,11 @@ assert 255 'int main() { return "\x00ff"[0]; }'
 assert 66 'int main() { return "\x4142"[0]; }'
 assert 67 'int main() { return "\x414243"[0]; }'
 
-assert 3 'int main() { return printf("abc"); }'
+assert 0 'int main() { return ({ 0; }); }'
+assert 2 'int main() { return ({ 0; 1; 2; }); }'
+assert 1 'int main() { ({ 0; return 1; 2; }); return 3; }'
+assert 6 'int main() { return ({ 1; }) + ({ 2; }) + ({ 3; }); }'
+assert 3 'int main() { return ({ int x=3; x; }); }'
+assert 3 'int main() { int a = ({ int x=3; x; }); return a; }'
 
 echo OK

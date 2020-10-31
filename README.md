@@ -30,4 +30,5 @@ unary         = ("+" | "-" | "&" | "*") unary
 postfix       = primary ("[" expr "]")*
 funcall       = ident "(" (assign ("," assign)*)? ")"
 primary       = "(" expr ")" | funcall | ident | num
+              | "(" "{" stmt+ "}" ")"
 ```
