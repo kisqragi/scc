@@ -226,4 +226,6 @@ assert 255 'int main() { return "\x00ff"[0]; }'
 assert 66 'int main() { return "\x4142"[0]; }'
 assert 67 'int main() { return "\x414243"[0]; }'
 
+assert 3 'int main() { return printf("abc"); }'
+
 echo OK

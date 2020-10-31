@@ -33,7 +33,6 @@ struct Token {
     int val;
     char *loc;
     int len;
-    Type *ty;   // Used if TK_STR
     char *str;  // String literal contents including terminating '\0'
 };
 
