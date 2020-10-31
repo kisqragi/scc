@@ -1,4 +1,6 @@
 #include "scc.h"
+#include <ctype.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 // Input string
@@ -119,6 +121,10 @@ static bool is_octal_range(char *p) {
     return ('0' <= *p && *p <= '7');
 }
 
+static bool is_hex_range(char *p) {
+    return ('0' <= *p && *p <= '7');
+}
+
 static char read_escaped_char(char *p, char **endptr) {
     // octal number
     if (is_octal_range(p)) {
@@ -131,6 +137,13 @@ static char read_escaped_char(char *p, char **endptr) {
         }
         *endptr = p;
         return n;
+    }
+
+    // hexadecimal number
+    if (*p == 'x') {
+        if (!isxdigit(*(++p)))
+            error_at(p, "invalid hex escape sequence");
+        return strtoul(p, endptr, 16);
     }
 
     *endptr = p + 1;

@@ -219,4 +219,11 @@ assert 16 'int main() { return "\20"[0]; }'
 assert 65 'int main() { return "\101"[0]; }'
 assert 104 'int main() { return "\1500"[0]; }'
 
+assert 0 'int main() { return "\x00"[0]; }'
+assert 119 'int main() { return "\x77"[0]; }'
+assert 165 'int main() { return "\xA5"[0]; }'
+assert 255 'int main() { return "\x00ff"[0]; }'
+assert 66 'int main() { return "\x4142"[0]; }'
+assert 67 'int main() { return "\x414243"[0]; }'
+
 echo OK
