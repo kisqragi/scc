@@ -105,6 +105,8 @@ void add_type(Node *node) {
                     return;
                 }
             }
+            error_tok(node->tok, "statement expression returning void is not supported");
+            return;
         default:
             return;
     }
