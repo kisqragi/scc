@@ -2,6 +2,10 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+// Input filename
+static char *current_filename;
 
 // Input string
 static char *current_input;
@@ -17,8 +21,32 @@ void error(char *fmt, ...) {
 
 // Reports an error location and exit.
 void verror_at(char *loc, char *fmt, va_list ap) {
-    int pos = loc - current_input;
-    fprintf(stderr, "%s\n", current_input);
+    // Find the beginning of a line.
+    char *start = loc;
+    while (start[-1] != '\n' && current_input < start)
+        start--;
+
+    while (isblank(*start))
+        start++;
+
+    // Get a line number.
+    int line_no = 1;
+    char *bof = current_input;
+    while (bof < start) {
+        if (*bof == '\n')
+            line_no++;
+        bof++;
+    }
+
+    // Get a location of EOL.
+    char *end = loc;
+    while (*end++ != '\n');
+
+    // Print out the line.
+    int indent = fprintf(stderr, "%s:%d: ", current_filename, line_no);
+    fprintf(stderr, "%.*s", (int)(end-start), start);
+
+    int pos = indent + loc - start;
     fprintf(stderr, "%*s", pos, "");
     fprintf(stderr, "^ ");
     vfprintf(stderr, fmt, ap);
@@ -191,7 +219,8 @@ static Token *read_string_literal(char *start) {
 }
 
 // Tokenize `p` and returns new tokens.
-Token *tokenize(char *p) {
+static Token *tokenize(char *filename, char *p) {
+    current_filename = filename;
     current_input = p;
 
     Token head = {};
@@ -244,4 +273,43 @@ Token *tokenize(char *p) {
     cur = cur->next = new_token(TK_EOF, p, p);
     convert_keywords(head.next);
     return head.next;
+}
+
+static char *read_file(char *path) {
+    FILE *fp;
+
+    if (!strncmp(path, "-", 1)) {
+        fp = stdin;
+    } else {
+        fp = fopen(path, "r");
+        if (!fp)
+            error("cannot open %s: %s", path, strerror(errno));
+    }
+
+    char *buf;
+    size_t buflen;
+    FILE *out = open_memstream(&buf, &buflen);
+
+    for (;;) {
+        char tmp[4096];
+        int size = fread(tmp, 1, sizeof(tmp), fp);
+        if (!size) break;
+        fwrite(tmp, 1, size, out);
+    }
+
+    if (fp != stdin)
+        fclose(fp);
+
+    // Make sure that the last line is properly terminated with '\n'.
+    fflush(out);
+    if (!buflen || buf[buflen-1] != '\n')
+        fputc('\n', out);
+    fputc('\0', out);
+    fclose(out);
+
+    return buf;
+}
+
+Token *tokenize_file(char *path) {
+    return tokenize(path, read_file(path));
 }
