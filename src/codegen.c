@@ -5,12 +5,13 @@
 static void gen_expr(Node *node);
 static void gen_stmt(Node *node);
 
+static FILE *output_file;
 static void println(char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
-    vprintf(fmt, ap);
+    vfprintf(output_file, fmt, ap);
     va_end(ap);
-    putchar('\n');
+    fprintf(output_file, "\n");
 }
 
 static int depth;
@@ -289,7 +290,8 @@ static void emit_text(Obj *prog) {
     }
 }
 
-void codegen(Obj *prog) {
+void codegen(Obj *prog, FILE *out) {
+    output_file = out;
     assign_lvar_offset(prog);
     emit_data(prog);
     emit_text(prog);

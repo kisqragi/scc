@@ -133,7 +133,7 @@ Obj *parse(Token *tok);
 // codegen.c
 //
 
-void codegen(Obj *prog);
+void codegen(Obj *prog, FILE *out);
 
 //
 // strings.c
