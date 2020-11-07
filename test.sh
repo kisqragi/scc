@@ -233,4 +233,20 @@ assert 6 'int main() { return ({ 1; }) + ({ 2; }) + ({ 3; }); }'
 assert 3 'int main() { return ({ int x=3; x; }); }'
 assert 3 'int main() { int a = ({ int x=3; x; }); return a; }'
 
+assert 0 'int main() { int a = 0; /* a = 1; a = 2; */ return a; }'
+assert 0 'int main() { 
+    int a = 0; 
+    /*  a = 1;
+        a = 2; */
+    return a; 
+}'
+
+
+assert 0 'int main() {
+    int a = 0;
+//    a = 1;
+    return a;
+}
+'
+
 echo OK
