@@ -16,7 +16,7 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c $(SRCDIR)/scc.h
 all: clean $(TARGET)
 
 test: $(TARGET)
-	./test.sh
+	test/test.sh
 
 clean:
 	-rm -f $(OBJECTS) $(TARDIR)/*
