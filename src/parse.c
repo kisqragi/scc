@@ -290,12 +290,8 @@ static Node *stmt(Token **rest, Token *tok) {
         return node;
     }
 
-    if (equal(tok, "{")) {
-        enter_scope();
-        Node *node = compound_stmt(rest, tok->next);
-        leave_scope();
-        return node;
-    }
+    if (equal(tok, "{"))
+        return compound_stmt(rest, tok->next);
 
     return expr_stmt(rest, tok);
 }
@@ -574,9 +570,7 @@ static Node *primary(Token **rest, Token *tok) {
         if (equal(tok->next, "{")) {
             // GNU statement expression.
             Node *node = new_node(ND_STMT_EXPR, tok);
-            enter_scope();
             node->body = compound_stmt(&tok, tok->next->next)->body;
-            leave_scope();
             *rest = skip(tok, ")");
             return node;
         } else {
@@ -622,7 +616,6 @@ static void create_param_lvars(Type *param) {
 }
 
 static Token *funcdef(Token *tok, Type *basety) {
-    enter_scope();
     Type *ty = declarator(&tok, tok, basety);
 
     Obj *fn = new_gvar(get_ident(ty->name), ty);
@@ -630,6 +623,7 @@ static Token *funcdef(Token *tok, Type *basety) {
 
     locals = NULL;
 
+    enter_scope();
     create_param_lvars(ty->params);
     fn->params = locals;
 
