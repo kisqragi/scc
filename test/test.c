@@ -18,7 +18,29 @@ int for_loop() { int i=0; for (;;) { if (i>2) return i; i=i+1; } return 0; }
 int while_loop() { int i=0; while (1) { if (i>2) return i; i=i+1; } return 0; }
 int sub_char(char a, char b, char c) { return a-b-c; }
 
+int x, y;
+int z[4];
+
+int a;
+
 int main() {
+
+    printf("------ global ----------\n");
+    printf("int ret3() { return 3; }\n");
+    printf("int ret5() { return 5; }\n");
+    printf("int add(int x, int y) { return x+y; }\n");
+    printf("int sub(int x, int y) { return x-y; }\n");
+    printf("int add6(int a, int b, int c, int d, int e, int f) {\n");
+    printf("    return a+b+c+d+e+f;\n");
+    printf("}\n");
+    printf("int for_loop() { int i=0; for (;;) { if (i>2) return i; i=i+1; } return 0; }\n");
+    printf("int while_loop() { int i=0; while (1) { if (i>2) return i; i=i+1; } return 0; }\n");
+    printf("int sub_char(char a, char b, char c) { return a-b-c; }\n");
+    printf("int x, y;\n");
+    printf("int z[4];\n");
+    printf("int a;\n");
+    printf("------------------------\n\n");
+
     assert(0, 0, "0");
     assert(42, 42, "42");
 
@@ -133,7 +155,6 @@ int main() {
     assert(1, ({ int x[2][3]; int *y=(x+1); y[-3]=1; x[0][0]; }), "int x[2][3]; int *y=(x+1); y[-3]=1; x[0][0];");
     assert(1, ({ int x[2][3]; int *y=(x+1); (-3)[y]=1; x[0][0]; }), "int x[2][3]; int *y=(x+1); (-3)[y]=1; x[0][0];");
 
-
     assert(8, ({ int x; sizeof(x); }), "int x; sizeof(x);");
     assert(8, ({ int x; sizeof x; }), "int x; sizeof x;");
     assert(8, ({ int *x; sizeof(x); }), "int *x; sizeof(x);");
@@ -149,22 +170,17 @@ int main() {
     assert(8, ({ int x=1; sizeof(x=2); }), "int x=1; sizeof(x=2);");
     assert(1, ({ int x=1; sizeof(x=2); x; }), "int x=1; sizeof(x=2); x;");
 
-/*
- * Implement the scope and then test it
- *
- *
-    assert(0 'int x; int main() { return x, "");
-    assert(3 'int x; int main() { x=3; return x, "");
-    assert(7 'int x; int y; int main() { x=3; y=4; return x+y, "");
-    assert(7 'int x, y; int main() { x=3; y=4; return x+y, "");
-    assert(0 'int x[4]; int main() { x[0]=0; x[1]=1; x[2]=2; x[3]=3; return x[0], "");
-    assert(1 'int x[4]; int main() { x[0]=0; x[1]=1; x[2]=2; x[3]=3; return x[1], "");
-    assert(2 'int x[4]; int main() { x[0]=0; x[1]=1; x[2]=2; x[3]=3; return x[2], "");
-    assert(3 'int x[4]; int main() { x[0]=0; x[1]=1; x[2]=2; x[3]=3; return x[3], "");
+    assert(0, ({ x; }), "x;");
+    assert(3, ({ x=3; x; }), "x=3; x;");
+    assert(7, ({ x=3; y=4; x+y; }), "x=3; y=4; x+y;");
+    assert(7, ({ x=3; y=4; x+y; }), "x=3; y=4; x+y;");
+    assert(0, ({ z[0]=0; z[1]=1; z[2]=2; z[3]=3; z[0]; }), "z[0]=0; z[1]=1; z[2]=2; z[3]=3; z[0];");
+    assert(1, ({ z[0]=0; z[1]=1; z[2]=2; z[3]=3; z[1]; }), "z[0]=0; z[1]=1; z[2]=2; z[3]=3; z[1];");
+    assert(2, ({ z[0]=0; z[1]=1; z[2]=2; z[3]=3; z[2]; }), "z[0]=0; z[1]=1; z[2]=2; z[3]=3; z[2];");
+    assert(3, ({ z[0]=0; z[1]=1; z[2]=2; z[3]=3; z[3]; }), "z[0]=0; z[1]=1; z[2]=2; z[3]=3; z[3];");
 
-    assert(8 'int x; int main() { return sizeof(x), "");
-    assert(32 'int x[4]; int main() { return sizeof(x), "");
-*/
+    assert(8, sizeof(x), "sizeof(x)");
+    assert(32, sizeof(z), "sizeof(z)");
 
     assert(1, ({ char x=1; x; }), "char x=1; x;");
     assert(1, ({ char x=1; char y=2; x; }), "char x=1; char y=2; x;");
@@ -211,6 +227,12 @@ int main() {
     assert(-1, ({ "\x00ff"[0]; }), "\"\\x00ff\"[0];");
     assert(66, ({ "\x4142"[0]; }), "\"\\x4142\"[0];");
     assert(67, ({ "\x414243"[0]; }), "\"\\x414243\"[0];");
+
+    assert(10, ({ x = 10; x; }), "x = 10; x;");
+    assert(0, a, "a");
+    assert(10, ({ x = 10; { int x = 20; } x; }), "x = 10; { int x = 20; } x;");
+    assert(10, ({ int x = 20; { x = 10; } x; }), "int x = 20; { x = 10; } x;");
+    assert(10, ({ int x = 10; { int x = 50; } x; }), "int x = 10; { int x = 50; } x;");
 
     puts("OK");
     return 0;
