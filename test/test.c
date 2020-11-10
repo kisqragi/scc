@@ -233,6 +233,7 @@ int main() {
     assert(10, ({ x = 10; { int x = 20; } x; }), "x = 10; { int x = 20; } x;");
     assert(10, ({ int x = 20; { x = 10; } x; }), "int x = 20; { x = 10; } x;");
     assert(10, ({ int x = 10; { int x = 50; } x; }), "int x = 10; { int x = 50; } x;");
+    assert(30, ({ x = 10; { x = 50; { x = 30; } } x; }), "x = 10; { x = 50; { x = 30; } } x;");
 
     puts("OK");
     return 0;

@@ -21,11 +21,6 @@ static void leave_scope() {
     current_scope = current_scope->next;
 }
 
-static void push_var_scope(Obj *obj) {
-    obj->next = current_scope->obj;
-    current_scope->obj = obj;
-}
-
 // All local variable instances created during parsing are accumulated to this list.
 static Obj *locals;
 static Obj *globals;
@@ -93,7 +88,7 @@ static Obj *new_var(char *name, Type *ty) {
     Obj *var = calloc(1, sizeof(Obj));
     var->name = name;
     var->ty = ty;
-    push_var_scope(var);
+    current_scope->obj = var;
     return var;
 }
 
