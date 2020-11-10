@@ -265,6 +265,13 @@ int main() {
     assert(16, ({ struct { int a; char b;} x; sizeof(x); }), "struct { int a; char b;} x; sizeof(x);");
     assert(16, ({ struct { int a; int b;} x; sizeof(x); }), "struct { int a; int b;} x; sizeof(x);");
 
+    assert(15, ({ int x; int y; char z; char *a=&y; char *b=&z; b-a; }), "int x; int y; char z; char *a=&y; char *b=&z; b-a;");
+    assert(1,  ({ int x; char y; int z; char *a=&y; char *b=&z; b-a; }), "int x; char y; int z; char *a=&y; char *b=&z; b-a;");
+    assert(23, ({ int x; int y; char z; char *a=&x; char *b=&z; b-a; }), "int x; int y; char z; char *a=&x; char *b=&z; b-a;");
+    assert(1,  ({ char x; char y; char z; char *a=&x; char *b=&y; b-a; }), "char x; char y; char z; char *a=&x; char *b=&y; b-a;");
+    assert(2,  ({ char x; char y; char z; char *a=&x; char *b=&z; b-a; }), "char x; char y; char z; char *a=&x; char *b=&z; b-a;");
+    assert(3,  ({ char x; char y; char z; int c; char *a=&x; char *b=&c; b-a; }), "char x; char y; char z; int c; char *a=&x; char *b=&c; b-a;");
+
     puts("OK");
     return 0;
 }
