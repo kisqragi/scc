@@ -235,6 +235,9 @@ int main() {
     assert(10, ({ int x = 10; { int x = 50; } x; }), "int x = 10; { int x = 50; } x;");
     assert(30, ({ x = 10; { x = 50; { x = 30; } } x; }), "x = 10; { x = 50; { x = 30; } } x;");
 
+    assert(3, (1,2,3), "(1,2,3)");
+    assert(10, add(5, (x=3, x+2)), "add(5, (x=3, x+2))");
+
     puts("OK");
     return 0;
 }
