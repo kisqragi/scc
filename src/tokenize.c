@@ -20,7 +20,7 @@ void error(char *fmt, ...) {
 }
 
 // Reports an error location and exit.
-void verror_at(char *loc, char *fmt, va_list ap) {
+static void verror_at(int line_no, char *loc, char *fmt, va_list ap) {
     // Find the beginning of a line.
     char *start = loc;
     while (start[-1] != '\n' && current_input < start)
@@ -28,15 +28,6 @@ void verror_at(char *loc, char *fmt, va_list ap) {
 
     while (isblank(*start))
         start++;
-
-    // Get a line number.
-    int line_no = 1;
-    char *bof = current_input;
-    while (bof < start) {
-        if (*bof == '\n')
-            line_no++;
-        bof++;
-    }
 
     // Get a location of EOL.
     char *end = loc;
@@ -55,15 +46,23 @@ void verror_at(char *loc, char *fmt, va_list ap) {
 }
 
 void error_at(char *loc, char *fmt, ...) {
+
+    // Get line number
+    int line_no = 1;
+    for (char *p = current_input; p < loc; p++) {
+        if (*p == '\n')
+            line_no++;
+    }
+
     va_list ap;
     va_start(ap, fmt);
-    verror_at(loc, fmt, ap);
+    verror_at(line_no, loc, fmt, ap);
 }
 
 void error_tok(Token *tok, char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
-    verror_at(tok->loc, fmt, ap);
+    verror_at(tok->line_no, tok->loc, fmt, ap);
 }
 
 // Consumes the current token if it matches `s`.
@@ -218,6 +217,21 @@ static Token *read_string_literal(char *start) {
     return tok;
 }
 
+static void add_lineno(Token *tok) {
+    char *p = current_input;
+    int line_no = 1;
+    while (*p) {
+        if (p == tok->loc) {
+            tok->line_no = line_no;
+            tok = tok->next;
+        }
+        if (*p == '\n')
+            line_no++;
+
+        p++;
+    }
+}
+
 // Tokenize `p` and returns new tokens.
 static Token *tokenize(char *filename, char *p) {
     current_filename = filename;
@@ -288,6 +302,7 @@ static Token *tokenize(char *filename, char *p) {
     }
 
     cur = cur->next = new_token(TK_EOF, p, p);
+    add_lineno(head.next);
     convert_keywords(head.next);
     return head.next;
 }

@@ -34,11 +34,12 @@ struct Token {
     int val;
     char *loc;
     int len;
-    char *str;  // String literal contents including terminating '\0'
+    char *str;      // String literal contents including terminating '\0'
+
+    int line_no;    // Line number
 };
 
 void error(char *fmt, ...);
-void verror_at(char *loc, char *fmt, va_list ap);
 void error_at(char *loc, char *fmt, ...);
 void error_tok(Token *tok, char *fmt, ...);
 bool equal(Token *tok, char *op);
