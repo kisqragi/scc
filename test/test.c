@@ -254,11 +254,16 @@ int main() {
     assert(32, ({ struct {int a;} x[4]; sizeof(x); }), "struct {int a;} x[4]; sizeof(x);");
     assert(48, ({ struct {int a[3];} x[2]; sizeof(x); }), "struct {int a[3];} x[2]; sizeof(x);");
     assert(2, ({ struct {char a; char b;} x; sizeof(x); }), "struct {char a; char b;} x; sizeof(x);");
-    assert(9, ({ struct {char a; int b;} x; sizeof(x); }), "struct {char a; int b;} x; sizeof(x);");
+    assert(16, ({ struct {char a; int b;} x; sizeof(x); }), "struct {char a; int b;} x; sizeof(x);");
     assert(0, ({ struct {} x; sizeof(x); }), "struct {} x; sizeof(x);");
     assert(3, ({ struct {char a; char b;} x[8]; int *p=x; p[1]=3; x[4].a; }), "struct {char a; char b;} x[8]; int *p=x; p[1]=3; x[4].a;");
     assert(8, ({ struct {} x; sizeof(&x); }), "struct {} x; sizeof(&x);");
     assert(8, ({ struct {} *x; sizeof(x); }), "struct {} *x; sizeof(x);");
+
+    assert(2, ({ struct { char a; char b;} x; sizeof(x); }), "struct { char a; char b;} x; sizeof(x);");
+    assert(16, ({ struct { char a; int b;} x; sizeof(x); }), "struct { char a; int b;} x; sizeof(x);");
+    assert(16, ({ struct { int a; char b;} x; sizeof(x); }), "struct { int a; char b;} x; sizeof(x);");
+    assert(16, ({ struct { int a; int b;} x; sizeof(x); }), "struct { int a; int b;} x; sizeof(x);");
 
     puts("OK");
     return 0;

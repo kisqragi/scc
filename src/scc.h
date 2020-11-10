@@ -147,6 +147,7 @@ struct Member {
 //
 
 void codegen(Obj *prog, FILE *out);
+int align_to(int n, int align);
 
 //
 // strings.c
@@ -172,6 +173,9 @@ struct Type {
 
     // Pointer
     int size;   // sizeof() value
+
+    // alignment
+    int align;
 
     Type *base;
 

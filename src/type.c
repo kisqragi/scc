@@ -1,8 +1,8 @@
 #include "scc.h"
 #include <stdlib.h>
 
-Type *ty_char = &(Type){TY_CHAR, 1};
-Type *ty_int = &(Type){TY_INT, 8};
+Type *ty_char = &(Type){TY_CHAR, 1, 1};
+Type *ty_int = &(Type){TY_INT, 8, 8};
 
 bool is_integer(Type *ty) {
     return ty->kind == TY_CHAR || ty->kind == TY_INT;
@@ -22,6 +22,7 @@ Type *pointer_to(Type *base) {
     Type *ty = calloc(1, sizeof(Type));
     ty->kind = TY_PTR;
     ty->size = 8;
+    ty->align = 8;
     ty->base = base;
     return ty;
 }
@@ -39,6 +40,7 @@ Type *array_of(Type *base, int len) {
     ty->size = base->size * len;
     ty->base = base;
     ty->array_len = len;
+    ty->align = base->size;
     return ty;
 }
 

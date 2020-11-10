@@ -162,14 +162,20 @@ static Type *struct_decl(Token **rest, Token *tok) {
     Type *ty = calloc(1, sizeof(Type));
     ty->kind = TY_STRUCT;
     ty->members = struct_members(rest, tok);
+    ty->align = 1;
 
     // member offset
     int offset = 0;
     for (Member *m = ty->members; m; m = m->next) {
+        offset = align_to(offset, m->ty->align);
         m->offset = offset;
         offset += m->ty->size;
+
+        if (ty->align < m->ty->align)
+            ty->align = m->ty->align;
     }
-    ty->size = offset;
+
+    ty->size = align_to(offset, ty->align);
 
     return ty;
 }
@@ -286,7 +292,6 @@ static Node *declaration(Token **rest, Token *tok) {
     *rest = tok->next;
     return node;
 }
-
 
 // stmt = "return" expr ";"
 //      | "if" "(" expr ")" stmt ("else" stmt)?
