@@ -10,6 +10,7 @@ struct Scope {
 };
 
 static Scope *current_scope;
+static Scope *file_scope;
 
 static void enter_scope() {
     Scope *scope = calloc(1, sizeof(Scope));
@@ -89,7 +90,6 @@ static Obj *new_var(char *name, Type *ty) {
     Obj *var = calloc(1, sizeof(Obj));
     var->name = name;
     var->ty = ty;
-    current_scope->obj = var;
     return var;
 }
 
@@ -98,6 +98,7 @@ static Obj *new_lvar(char *name, Type *ty) {
     var->is_local = true;
     var->next = locals;
     locals = var;
+    current_scope->obj = locals;
     return var;
 }
 
@@ -105,6 +106,7 @@ static Obj *new_gvar(char *name, Type *ty) {
     Obj *var = new_var(name, ty);
     var->next = globals;
     globals = var;
+    file_scope->obj = globals;
     return var;
 }
 
@@ -748,6 +750,7 @@ static bool is_function(Token *tok) {
 // program = (function-definition | global-variable)*
 Obj *parse(Token *tok) {
     enter_scope();
+    file_scope = current_scope;
     globals = NULL;
 
     while (tok->kind != TK_EOF) {
