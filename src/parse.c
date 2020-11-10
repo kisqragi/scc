@@ -25,6 +25,7 @@ static void leave_scope() {
 static Obj *locals;
 static Obj *globals;
 
+static Type *declspec(Token **rest, Token *tok);
 static Type *declarator(Token **rest, Token *tok, Type *ty);
 static Node *declaration(Token **rest, Token *tok);
 static Node *compound_stmt(Token **rest, Token *tok);
@@ -130,8 +131,74 @@ static char *get_ident(Token *tok) {
     return strndup(tok->loc, tok->len);
 }
 
-// declspec = "char" | "int"
+static Member *struct_members(Token **rest, Token *tok) {
+    Member head = {};
+    Member *cur = &head;
+
+    while (!equal(tok, "}")) {
+        int i = 0;
+        Type *basety = declspec(&tok, tok);
+        while (!equal(tok, ";")) {
+            if (i++ > 0) {
+                tok = skip(tok, ",");
+            }
+
+            Type *ty = declarator(&tok, tok, basety);
+            Member *member = calloc(1, sizeof(Member));
+            member->name = ty->name;
+            member->ty = ty;
+            member->offset = ty->size;
+            cur = cur->next = member;
+        }
+        tok = skip(tok, ";");
+    }
+    *rest = skip(tok, "}");
+    return head.next;
+}
+
+static Type *struct_decl(Token **rest, Token *tok) {
+    tok = skip(tok, "{");
+
+    Type *ty = calloc(1, sizeof(Type));
+    ty->kind = TY_STRUCT;
+    ty->members = struct_members(rest, tok);
+
+    // member offset
+    int offset = 0;
+    for (Member *m = ty->members; m; m = m->next) {
+        m->offset = offset;
+        offset += m->ty->size;
+    }
+    ty->size = offset;
+
+    return ty;
+}
+
+static Member *get_member(Member *members, Token *tok) {
+    for (Member *m = members; m; m = m->next) {
+        if (tok->len == m->name->len &&
+                !strcmp(get_ident(tok), get_ident(m->name)))
+            return m;
+    }
+    error_tok(tok, "no such member");
+}
+
+static Node *struct_ref(Node *node, Token *tok) {
+    add_type(node);
+    if (node->ty->kind != TY_STRUCT)
+        error_tok(tok, "not a struct");
+
+    Node *n = new_unary(ND_MEMBER, node, tok);
+    n->member = get_member(node->ty->members, tok);
+    return n;
+}
+
+// declspec = "char" | "int" | "struct"
 static Type *declspec(Token **rest, Token *tok) {
+
+    if (equal(tok, "struct"))
+        return struct_decl(rest, tok->next);
+
     if (equal(tok, "char")) {
         *rest = tok->next;
         return ty_char;
@@ -292,7 +359,7 @@ static Node *stmt(Token **rest, Token *tok) {
 }
 
 static bool is_typename(Token *tok) {
-    return equal(tok, "char") || equal(tok, "int");
+    return equal(tok, "char") || equal(tok, "int") || equal(tok, "struct");
 }
 
 // compound-stmt = (declaration | stmt)* "}"
@@ -527,19 +594,31 @@ static Node *unary(Token **rest, Token *tok) {
     return postfix(rest, tok);
 }
 
-// postfix = primary ("[" expr "]")*
+// postfix = primary ("[" expr "]" | "." ident)*
 static Node *postfix(Token **rest, Token *tok) {
     Node *node = primary(&tok, tok);
 
-    while (equal(tok, "[")) {
-        // x[y] is short for *(x+y)
-        Token *start = tok;
-        Node *idx = expr(&tok, tok->next);
-        tok = skip(tok, "]");
-        node = new_unary(ND_DEREF, new_add(node, idx, start), start);
+    for (;;) {
+        // Array
+        if (equal(tok, "[")) {
+            // x[y] is short for *(x+y)
+            Token *start = tok;
+            Node *idx = expr(&tok, tok->next);
+            tok = skip(tok, "]");
+            node = new_unary(ND_DEREF, new_add(node, idx, start), start);
+            continue;
+        }
+
+        // Struct
+        if (equal(tok, ".")) {
+            node = struct_ref(node, tok->next);
+            tok = tok->next->next;
+            continue;
+        }
+
+        *rest = tok;
+        return node;
     }
-    *rest = tok;
-    return node;
 }
 
 // funcall = ident "(" (assign ("," assign)*)? ")"

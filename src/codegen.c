@@ -76,6 +76,10 @@ static void gen_addr(Node *node) {
         case ND_DEREF:
             gen_expr(node->lhs);
             return;
+        case ND_MEMBER:
+            gen_addr(node->lhs);
+            println("   add $%d, %%rax", node->member->offset);
+            return;
         default:
             error_tok(node->tok, "not an lvalue");
     }
@@ -112,6 +116,10 @@ static void gen_expr(Node *node) {
         case ND_COMMA:
             gen_expr(node->lhs);
             gen_expr(node->rhs);
+            return;
+        case ND_MEMBER:
+            gen_addr(node);
+            load(node->member->ty);
             return;
         case ND_STMT_EXPR:
             for (Node *n = node->body; n; n = n->next)

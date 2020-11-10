@@ -11,7 +11,7 @@
 
 typedef struct Node Node;
 typedef struct Type Type;
-
+typedef struct Member Member;
 
 //
 // tokenize.c
@@ -88,6 +88,7 @@ typedef enum {
     ND_LE,
     ND_ASSIGN,
     ND_COMMA,
+    ND_MEMBER,
     ND_ADDR,        // unary &
     ND_DEREF,       // unary *
     ND_RETURN,
@@ -127,9 +128,19 @@ struct Node {
 
     Obj *var;   // Used if kind == ND_VAR
     int val;    // Used if kind == ND_NUM
+
+    // Struct
+    Member *member;
 };
 
 Obj *parse(Token *tok);
+
+struct Member {
+    Member *next;
+    Type *ty;
+    Token *name;
+    int offset;
+};
 
 //
 // codegen.c
@@ -153,6 +164,7 @@ typedef enum  {
     TY_PTR,
     TY_FUNC,
     TY_ARRAY,
+    TY_STRUCT,
 } TypeKind;
 
 struct Type {
@@ -173,6 +185,9 @@ struct Type {
     Type *return_ty;
     Type *params;
     Type *next;
+
+    // struct
+    Member *members;
 };
 
 extern Type *ty_char;
