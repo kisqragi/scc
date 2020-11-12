@@ -78,7 +78,7 @@ static void gen_addr(Node *node) {
             return;
         case ND_MEMBER:
             gen_addr(node->lhs);
-            println("   add $%d, %%rax", node->member->offset);
+            println("    add $%d, %%rax", node->member->offset);
             return;
         default:
             error_tok(node->tok, "not an lvalue");
@@ -86,7 +86,7 @@ static void gen_addr(Node *node) {
 }
 
 static void gen_expr(Node *node) {
-    println("   .loc 1 %d", node->tok->line_no);
+    println("    .loc 1 %d", node->tok->line_no);
 
     switch (node->kind) {
         case ND_NUM:
@@ -186,7 +186,7 @@ static void gen_expr(Node *node) {
 }
 
 static void gen_stmt(Node *node) {
-    println("   .loc 1 %d", node->tok->line_no);
+    println("    .loc 1 %d", node->tok->line_no);
 
     switch (node->kind) {
         case ND_IF: {

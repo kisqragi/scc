@@ -9,10 +9,18 @@ struct VarScope {
     Obj *var;
 };
 
+typedef struct TagScope TagScope;
+struct TagScope {
+    TagScope *next;
+    char *name;
+    Type *ty;
+};
+
 typedef struct Scope Scope;
 struct Scope {
     Scope *next;
     VarScope *vsc;
+    TagScope *tsc;
 };
 
 static Scope *scope;
@@ -27,12 +35,19 @@ static void leave_scope() {
     scope = scope->next;
 }
 
-static VarScope *push_scope(Obj *var) {
+static void push_var_scope(Obj *var) {
     VarScope *vsc = calloc(1, sizeof(VarScope));
     vsc->var = var;
     vsc->next = scope->vsc;
     scope->vsc = vsc;
-    return vsc;
+}
+
+static void push_tag_scope(char *name, Type *ty) {
+    TagScope *tsc = calloc(1, sizeof(TagScope));
+    tsc->name = name;
+    tsc->ty = ty;
+    tsc->next = scope->tsc;
+    scope->tsc = tsc;
 }
 
 // All local variable instances created during parsing are accumulated to this list.
@@ -55,18 +70,28 @@ static Node *unary(Token **rest, Token *tok);
 static Node *postfix(Token **rest, Token *tok);
 static Node *primary(Token **rest, Token *tok);
 
+static char *get_ident(Token *tok);
+
 // find a local variable by name.
 static Obj *find_var(Token *tok) {
     for (Scope *sc = scope; sc; sc = sc->next) {
         for (VarScope *vsc = sc->vsc; vsc; vsc = vsc->next) {
-            if (strlen(vsc->var->name) == tok->len && !strncmp(tok->loc, vsc->var->name, tok->len))
+            if (equal(tok, vsc->var->name))
                 return vsc->var;
         }
     }
-
     return NULL;
 }
 
+static Type *find_tag(Token *tok) {
+    for (Scope *sc = scope; sc; sc = sc->next) {
+        for (TagScope *tsc = sc->tsc; tsc; tsc = tsc->next) {
+            if (equal(tok, tsc->name))
+                return tsc->ty;
+        }
+    }
+    return NULL;
+}
 static Node *new_node(NodeKind kind, Token *tok) {
     Node *node = calloc(1, sizeof(Node));
     node->kind = kind;
@@ -103,7 +128,7 @@ static Obj *new_var(char *name, Type *ty) {
     Obj *var = calloc(1, sizeof(Obj));
     var->name = name;
     var->ty = ty;
-    push_scope(var);
+    push_var_scope(var);
     return var;
 }
 
@@ -145,6 +170,7 @@ static char *get_ident(Token *tok) {
     return strndup(tok->loc, tok->len);
 }
 
+// struct-members = (declspec declarator ("," declarator)* ";")*
 static Member *struct_members(Token **rest, Token *tok) {
     Member head = {};
     Member *cur = &head;
@@ -170,7 +196,22 @@ static Member *struct_members(Token **rest, Token *tok) {
     return head.next;
 }
 
+// struct-decl = ident? "{" struct-members
 static Type *struct_decl(Token **rest, Token *tok) {
+    Token *tag = NULL;
+    if (tok->kind == TK_IDENT) {
+        tag = tok;
+        tok = tok->next;
+    }
+
+    if (tag && !equal(tok, "{")) {
+        Type *ty = find_tag(tag);
+        if (!ty)
+            error_tok(tok, "unknown struct type");
+        *rest = tok;
+        return ty;
+    }
+
     tok = skip(tok, "{");
 
     Type *ty = calloc(1, sizeof(Type));
@@ -190,6 +231,9 @@ static Type *struct_decl(Token **rest, Token *tok) {
     }
 
     ty->size = align_to(offset, ty->align);
+
+    if (tag)
+        push_tag_scope(get_ident(tag), ty);
 
     return ty;
 }
@@ -213,7 +257,7 @@ static Node *struct_ref(Node *node, Token *tok) {
     return n;
 }
 
-// declspec = "char" | "int" | "struct"
+// declspec = "char" | "int" | "struct" struct-decl
 static Type *declspec(Token **rest, Token *tok) {
 
     if (equal(tok, "struct"))

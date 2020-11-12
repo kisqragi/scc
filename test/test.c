@@ -272,6 +272,14 @@ int main() {
     assert(2,  ({ char x; char y; char z; char *a=&x; char *b=&z; b-a; }), "char x; char y; char z; char *a=&x; char *b=&z; b-a;");
     assert(3,  ({ char x; char y; char z; int c; char *a=&x; char *b=&c; b-a; }), "char x; char y; char z; int c; char *a=&x; char *b=&c; b-a;");
 
+    assert(16, ({ struct t {int a; int b;} x; struct t y; sizeof(y); }), "struct t {int a; int b;} x; struct t y; sizeof(y);");
+    assert(16, ({ struct t {int a; int b;}; struct t y; sizeof(y); }), "struct t {int a; int b;}; struct t y; sizeof(y);");
+    assert(2, ({ struct t {char a[2];}; { struct t {char a[4];}; } struct t y; sizeof(y); }),
+                    "struct t {char a[2];}; { struct t {char a[4];}; } struct t y; sizeof(y);");
+    assert(3, ({ struct t {int x;}; int t=1; struct t y; y.x=2; t+y.x; }), "struct t {int x;}; int t=1; struct t y; y.x=2; t+y.x;");
+    assert(10, ({ struct t {int a; int b;} x; struct t y; y.a = 10; y.a; }), "struct t {int a; int b;} x; struct t y; y.a = 10; y.a;");
+    assert(10, ({ struct t {int a; int b;} x; struct t y; y.b = 10; y.b; }), "struct t {int a; int b;} x; struct t y; y.b = 10; y.b;");
+
     puts("OK");
     return 0;
 }
