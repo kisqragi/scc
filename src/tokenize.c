@@ -119,7 +119,8 @@ static bool is_ident_nfirst(char c) {
 // Read a punctuator token from p and returns its length.
 static int read_punct(char *p) {
     if (startswith(p, "==") || startswith(p, "!=") ||
-        startswith(p, ">=") || startswith(p, "<=")) {
+        startswith(p, ">=") || startswith(p, "<=") ||
+        startswith(p, "->")) {
         return 2;
     }
 

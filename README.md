@@ -29,7 +29,7 @@ mul            = unary ("*" unary | "/" unary)*
 unary          = ("+" | "-" | "&" | "*") unary
                | "sizeof" unary
                | postfix
-postfix        = primary ("[" expr "]" | "." ident)*
+postfix        = primary ("[" expr "]" | "." ident | "->" ident)*
 funcall        = ident "(" (assign ("," assign)*)? ")"
 primary        = "(" expr ")" | funcall | ident | num
                | "(" "{" stmt+ "}" ")"

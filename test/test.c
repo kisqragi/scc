@@ -280,6 +280,16 @@ int main() {
     assert(10, ({ struct t {int a; int b;} x; struct t y; y.a = 10; y.a; }), "struct t {int a; int b;} x; struct t y; y.a = 10; y.a;");
     assert(10, ({ struct t {int a; int b;} x; struct t y; y.b = 10; y.b; }), "struct t {int a; int b;} x; struct t y; y.b = 10; y.b;");
 
+    assert(10, ({ struct t { int a; int b; } x; struct t *y = &x; x.a = 10; x.b = 11; y->a; }),
+                 "struct t { int a; int b; } x; struct t *y = &x; x.a = 10; x.b = 11; y->a;");
+    assert(11, ({ struct t { int a; int b; } x; struct t *y = &x; x.a = 10; x.b = 11; y->b; }),
+                 "struct t { int a; int b; } x; struct t *y = &x; x.a = 10; x.b = 11; y->b;");
+    assert(10, ({ struct t { int a; int b; } x; struct t *y = &x; x.a = 10; x.b = 11; (*y).a; }),
+                 "struct t { int a; int b; } x; struct t *y = &x; x.a = 10; x.b = 11; (*y).a;");
+    assert(11, ({ struct t { int a; int b; } x; struct t *y = &x; x.a = 10; x.b = 11; (*y).b; }),
+                 "struct t { int a; int b; } x; struct t *y = &x; x.a = 10; x.b = 11; (*y).b;");
+    assert(8, ({ struct t { int a; int b; } x; struct t *y = &x; sizeof(y); }), "struct t { int a; int b; } x; struct t *y = &x; sizeof(y); ");
+
     puts("OK");
     return 0;
 }
