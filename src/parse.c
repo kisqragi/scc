@@ -3,23 +3,36 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef struct VarScope VarScope;
+struct VarScope {
+    VarScope *next;
+    Obj *var;
+};
+
 typedef struct Scope Scope;
 struct Scope {
     Scope *next;
-    Obj *obj;
+    VarScope *vsc;
 };
 
-static Scope *current_scope;
-static Scope *file_scope;
+static Scope *scope;
 
 static void enter_scope() {
-    Scope *scope = calloc(1, sizeof(Scope));
-    scope->next = current_scope;
-    current_scope = scope;
+    Scope *sc = calloc(1, sizeof(Scope));
+    sc->next = scope;
+    scope = sc;
 }
 
 static void leave_scope() {
-    current_scope = current_scope->next;
+    scope = scope->next;
+}
+
+static VarScope *push_scope(Obj *var) {
+    VarScope *vsc = calloc(1, sizeof(VarScope));
+    vsc->var = var;
+    vsc->next = scope->vsc;
+    scope->vsc = vsc;
+    return vsc;
 }
 
 // All local variable instances created during parsing are accumulated to this list.
@@ -44,10 +57,10 @@ static Node *primary(Token **rest, Token *tok);
 
 // find a local variable by name.
 static Obj *find_var(Token *tok) {
-    for (Scope *scope = current_scope; scope; scope = scope->next) {
-        for (Obj *var = scope->obj; var; var = var->next) {
-            if (strlen(var->name) == tok->len && !strncmp(tok->loc, var->name, tok->len))
-                return var;
+    for (Scope *sc = scope; sc; sc = sc->next) {
+        for (VarScope *vsc = sc->vsc; vsc; vsc = vsc->next) {
+            if (strlen(vsc->var->name) == tok->len && !strncmp(tok->loc, vsc->var->name, tok->len))
+                return vsc->var;
         }
     }
 
@@ -90,6 +103,7 @@ static Obj *new_var(char *name, Type *ty) {
     Obj *var = calloc(1, sizeof(Obj));
     var->name = name;
     var->ty = ty;
+    push_scope(var);
     return var;
 }
 
@@ -98,7 +112,6 @@ static Obj *new_lvar(char *name, Type *ty) {
     var->is_local = true;
     var->next = locals;
     locals = var;
-    current_scope->obj = locals;
     return var;
 }
 
@@ -106,7 +119,6 @@ static Obj *new_gvar(char *name, Type *ty) {
     Obj *var = new_var(name, ty);
     var->next = globals;
     globals = var;
-    file_scope->obj = globals;
     return var;
 }
 
@@ -750,7 +762,6 @@ static bool is_function(Token *tok) {
 // program = (function-definition | global-variable)*
 Obj *parse(Token *tok) {
     enter_scope();
-    file_scope = current_scope;
     globals = NULL;
 
     while (tok->kind != TK_EOF) {
