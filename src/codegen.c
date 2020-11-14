@@ -286,7 +286,7 @@ static void emit_data(Obj *prog) {
 static void emit_text(Obj *prog) {
     for (Obj *fn = prog; fn; fn = fn->next) {
         // Global variable
-        if (!fn->is_function)
+        if (!fn->is_function || fn->is_declaration)
             continue;
 
         println("    .globl %s", fn->name);

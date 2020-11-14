@@ -771,6 +771,10 @@ static Token *funcdef(Token *tok, Type *basety) {
 
     Obj *fn = new_gvar(get_ident(ty->name), ty);
     fn->is_function = true;
+    fn->is_declaration = consume(&tok, tok, ";");
+
+    if (fn->is_declaration)
+        return tok;
 
     locals = NULL;
 

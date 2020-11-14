@@ -1,3 +1,5 @@
+int printf();
+
 int assert(int expected, int actual, char *code) {
     if (expected == actual)
         printf("%s => %d\n", code, actual);
