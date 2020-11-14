@@ -290,6 +290,17 @@ int main() {
                  "struct t { int a; int b; } x; struct t *y = &x; x.a = 10; x.b = 11; (*y).b;");
     assert(8, ({ struct t { int a; int b; } x; struct t *y = &x; sizeof(y); }), "struct t { int a; int b; } x; struct t *y = &x; sizeof(y); ");
 
+    assert(10, ({ struct t { int a; }x; x.a = 10; struct t y; y = x; y.a; }), "struct t { int a; }x; x.a = 10; struct t y; y = x; y.a;");
+    assert(3, ({ struct {int a,b;} x,y; x.a=3; y=x; y.a; }), "struct {int a,b;} x,y; x.a=3; y=x; y.a;");
+    assert(7, ({ struct t {int a,b;}; struct t x; x.a=7; struct t y; struct t *z=&y; *z=x; y.a; }), "struct t {int a,b;}; struct t x; x.a=7; struct t y; struct t *z=&y; *z=x; y.a;");
+    assert(7, ({ struct t {int a,b;}; struct t x; x.a=7; struct t y, *p=&x, *q=&y; *q=*p; y.a; }), "struct t {int a,b;}; struct t x; x.a=7; struct t y, *p=&x, *q=&y; *q=*p; y.a;");
+    assert(5, ({ struct t {char a, b;} x, y; x.a=5; y=x; y.a; }), "struct t {char a, b;} x, y; x.a=5; y=x; y.a;");
+
+    assert(3, ({ struct {int a,b;} x,y; x.a=3; y=x; y.a; }), "struct {int a,b;} x,y; x.a=3; y=x; y.a;");
+    assert(7, ({ struct t {int a,b;}; struct t x; x.a=7; struct t y; struct t *z=&y; *z=x; y.a; }), "struct t {int a,b;}; struct t x; x.a=7; struct t y; struct t *z=&y; *z=x; y.a;");
+    assert(7, ({ struct t {int a,b;}; struct t x; x.a=7; struct t y, *p=&x, *q=&y; *q=*p; y.a; }), "struct t {int a,b;}; struct t x; x.a=7; struct t y, *p=&x, *q=&y; *q=*p; y.a;");
+    assert(5, ({ struct t {char a, b;} x, y; x.a=5; y=x; y.a; }), "struct t {char a, b;} x, y; x.a=5; y=x; y.a;");
+
     puts("OK");
     return 0;
 }
