@@ -1,0 +1,12 @@
+BasedOnStyle: LLVM
+
+IndentWidth: 4
+UseTab: Never
+AccessModifierOffset: 0
+AlignConsecutiveAssignments: true
+AlignTrailingComments: true
+AllowShortBlocksOnASingleLine: true
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: true
+IndentCaseLabels: true

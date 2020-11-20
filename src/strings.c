@@ -7,7 +7,7 @@ char *format(char *fmt, ...) {
 
     va_list ap;
     va_start(ap, fmt);
-    vfprintf(out, fmt, ap); 
+    vfprintf(out, fmt, ap);
     va_end(ap);
     fclose(out);
     return buf;

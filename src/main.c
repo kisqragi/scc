@@ -1,6 +1,4 @@
 #include "scc.h"
-#include <stdio.h>
-#include <string.h>
 
 static FILE *output_path;
 static char *input_path;
@@ -11,26 +9,22 @@ static void usage(int status) {
 }
 
 static void write_file(char *path) {
-    if (!path)
-        error("error: missing filename after '-o'");
+    if (!path) error("error: missing filename after '-o'");
 
     if (*path == '-') {
         output_path = stdout;
     } else {
         output_path = fopen(path, "w");
-        if (!output_path)
-            error("cannot open %s: %s", path, strerror(errno));
+        if (!output_path) error("cannot open %s: %s", path, strerror(errno));
     }
 }
 
 static void parse_args(int argc, char **argv) {
     for (int i = 1; i < argc; i++) {
-        if (!strcmp("--help", argv[i]))
-            usage(0);
+        if (!strcmp("--help", argv[i])) usage(0);
 
         if (!strcmp("-o", argv[i])) {
-            if (!argv[++i])
-                usage(1);
+            if (!argv[++i]) usage(1);
             if (!strcmp("-", argv[i]))
                 output_path = stdout;
             else
@@ -45,17 +39,15 @@ static void parse_args(int argc, char **argv) {
         continue;
     }
 
-    if (!input_path)
-        error("no input files");
-    if (!output_path)
-        error("no output files");
+    if (!input_path) error("no input files");
+    if (!output_path) error("no output files");
 }
 
 int main(int argc, char **argv) {
     parse_args(argc, argv);
 
     Token *tok = tokenize_file(input_path);
-    Obj *prog = parse(tok);
+    Obj *prog  = parse(tok);
 
     fprintf(output_path, ".file 1 \"%s\"\n", input_path);
     codegen(prog, output_path);

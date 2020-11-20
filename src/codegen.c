@@ -1,6 +1,4 @@
 #include "scc.h"
-#include <stdarg.h>
-#include <stdio.h>
 
 static void gen_expr(Node *node);
 static void gen_stmt(Node *node);
@@ -16,7 +14,7 @@ static void println(char *fmt, ...) {
 
 static int depth;
 static Obj *current_fn;
-static char *argreg8[] = {"%dil", "%sil", "%dl", "%cl", "%r8b", "%r9b"};
+static char *argreg8[]  = {"%dil", "%sil", "%dl", "%cl", "%r8b", "%r9b"};
 static char *argreg16[] = {"%di", "%si", "%dx", "%cx", "%r8w", "%r9w"};
 static char *argreg32[] = {"%edi", "%esi", "%edx", "%ecx", "%r8d", "%r9d"};
 static char *argreg64[] = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"};
@@ -38,20 +36,16 @@ static int count(void) {
 
 // Round up `n` to the nearest multiple of `align`.
 // For instance, align_to(5, 8) returns 8 and align_to(11, 8) returns 16.
-int align_to(int n, int align) {
-    return (n + align - 1) / align * align;
-}
+int align_to(int n, int align) { return (n + align - 1) / align * align; }
 
 // Load a value from where %rax is pointing to.
 static void load(Type *ty) {
-    if (ty->kind == TY_ARRAY || ty->kind == TY_STRUCT) {
-        return;
-    }
+    if (ty->kind == TY_ARRAY || ty->kind == TY_STRUCT) { return; }
 
     switch (ty->size) {
-        case 1:  println("    movsbq (%%rax), %%rax"); break;
-        case 2:  println("    movswq (%%rax), %%rax"); break;
-        case 4:  println("    movsxd (%%rax), %%rax"); break;
+        case 1: println("    movsbq (%%rax), %%rax"); break;
+        case 2: println("    movswq (%%rax), %%rax"); break;
+        case 4: println("    movsxd (%%rax), %%rax"); break;
         default: println("    mov (%%rax), %%rax"); break;
     }
 }
@@ -69,9 +63,9 @@ static void store(Type *ty) {
     }
 
     switch (ty->size) {
-        case 1:  println("    mov %%al, (%%rdi)"); break;
-        case 2:  println("    mov %%ax, (%%rdi)"); break;
-        case 4:  println("    mov %%eax, (%%rdi)"); break;
+        case 1: println("    mov %%al, (%%rdi)"); break;
+        case 2: println("    mov %%ax, (%%rdi)"); break;
+        case 4: println("    mov %%eax, (%%rdi)"); break;
         default: println("    mov %%rax, (%%rdi)"); break;
     }
 }
@@ -96,8 +90,7 @@ static void gen_addr(Node *node) {
             gen_addr(node->lhs);
             println("    add $%d, %%rax", node->member->offset);
             return;
-        default:
-            error_tok(node->tok, "not an lvalue");
+        default: error_tok(node->tok, "not an lvalue");
     }
 }
 
@@ -105,9 +98,7 @@ static void gen_expr(Node *node) {
     println("    .loc 1 %d", node->tok->line_no);
 
     switch (node->kind) {
-        case ND_NUM:
-            println("    mov $%ld, %%rax", node->val);
-            return;
+        case ND_NUM: println("    mov $%ld, %%rax", node->val); return;
         case ND_NEG:
             gen_expr(node->lhs);
             println("    neg %%rax");
@@ -122,9 +113,7 @@ static void gen_expr(Node *node) {
             gen_expr(node->lhs);
             load(node->ty);
             return;
-        case ND_ADDR:
-            gen_addr(node->lhs);
-            return;
+        case ND_ADDR: gen_addr(node->lhs); return;
         case ND_ASSIGN:
             gen_addr(node->lhs);
             push();
@@ -148,18 +137,17 @@ static void gen_expr(Node *node) {
             for (Node *arg = node->args; arg; arg = arg->next) {
                 gen_expr(arg);
                 push();
-                nargs++; 
+                nargs++;
             }
 
-            for (int i = nargs-1; i >= 0; i--)
+            for (int i = nargs - 1; i >= 0; i--)
                 pop(argreg64[i]);
 
             println("    mov $0, %%rax");
             println("    call %s", node->funcname);
             return;
         }
-        default:
-            break;
+        default: break;
     }
 
     gen_expr(node->rhs);
@@ -168,15 +156,9 @@ static void gen_expr(Node *node) {
     pop("%rdi");
 
     switch (node->kind) {
-        case ND_ADD:
-            println("    add %%rdi, %%rax");
-            return;
-        case ND_SUB:
-            println("    sub %%rdi, %%rax");
-            return;
-        case ND_MUL:
-            println("    imul %%rdi, %%rax");
-            return;
+        case ND_ADD: println("    add %%rdi, %%rax"); return;
+        case ND_SUB: println("    sub %%rdi, %%rax"); return;
+        case ND_MUL: println("    imul %%rdi, %%rax"); return;
         case ND_DIV:
             println("    cqo");
             println("    idiv %%rdi");
@@ -187,19 +169,14 @@ static void gen_expr(Node *node) {
         case ND_LE:
             println("    cmp %%rdi, %%rax");
 
-            if (node->kind == ND_EQ)
-                println("    sete %%al");
-            if (node->kind == ND_NE)
-                println("    setne %%al");
-            if (node->kind == ND_LT)
-                println("    setl %%al");
-            if (node->kind == ND_LE)
-                println("    setle %%al");
+            if (node->kind == ND_EQ) println("    sete %%al");
+            if (node->kind == ND_NE) println("    setne %%al");
+            if (node->kind == ND_LT) println("    setl %%al");
+            if (node->kind == ND_LE) println("    setle %%al");
 
             println("    movzb %%al, %%rax");
             return;
-        default:
-            error_tok(node->tok, "invalid expression");
+        default: error_tok(node->tok, "invalid expression");
     }
 }
 
@@ -215,15 +192,13 @@ static void gen_stmt(Node *node) {
             gen_stmt(node->then);
             println("    jmp .L.if.end.%d", c);
             println(".L.if.else.%d:", c);
-            if (node->els)
-                gen_stmt(node->els);
+            if (node->els) gen_stmt(node->els);
             println(".L.if.end.%d:", c);
             return;
         }
         case ND_FOR: {
             int c = count();
-            if (node->init)
-                gen_stmt(node->init);
+            if (node->init) gen_stmt(node->init);
             println(".L.for.begin.%d:", c);
             if (node->cond) {
                 gen_expr(node->cond);
@@ -231,9 +206,7 @@ static void gen_stmt(Node *node) {
                 println("    je .L.for.end.%d", c);
             }
             gen_stmt(node->then);
-            if (node->inc) {
-                gen_expr(node->inc);
-            }
+            if (node->inc) { gen_expr(node->inc); }
             println("    jmp .L.for.begin.%d", c);
             println(".L.for.end.%d:", c);
             return;
@@ -246,24 +219,20 @@ static void gen_stmt(Node *node) {
             gen_expr(node->lhs);
             println("    jmp .L.return.%s", current_fn->name);
             return;
-        case ND_EXPR_STMT:
-            gen_expr(node->lhs);
-            return;
-        default:
-            error_tok(node->tok, "invalid statement");
+        case ND_EXPR_STMT: gen_expr(node->lhs); return;
+        default: error_tok(node->tok, "invalid statement");
     }
 }
 
 static void assign_lvar_offset(Obj *prog) {
     for (Obj *fn = prog; fn; fn = fn->next) {
         // Global variable
-        if (!fn->is_function)
-            continue;
+        if (!fn->is_function) continue;
 
         int offset = 0;
         for (Obj *var = fn->locals; var; var = var->next) {
             offset += var->ty->size;
-            offset = align_to(offset, var->ty->align);
+            offset      = align_to(offset, var->ty->align);
             var->offset = offset;
         }
         fn->stack_size = align_to(offset, 16);
@@ -272,8 +241,7 @@ static void assign_lvar_offset(Obj *prog) {
 
 static void emit_data(Obj *prog) {
     for (Obj *var = prog; var; var = var->next) {
-        if (var->is_function)
-            continue;
+        if (var->is_function) continue;
 
         println("    .data");
         println("    .globl %s", var->name);
@@ -291,8 +259,7 @@ static void emit_data(Obj *prog) {
 static void emit_text(Obj *prog) {
     for (Obj *fn = prog; fn; fn = fn->next) {
         // Global variable
-        if (!fn->is_function || fn->is_declaration)
-            continue;
+        if (!fn->is_function || fn->is_declaration) continue;
 
         println("    .globl %s", fn->name);
         println("    .text");
@@ -307,11 +274,23 @@ static void emit_text(Obj *prog) {
         // Save passed-by-register arguments to the stack
         int i = 0;
         for (Obj *var = fn->params; var; var = var->next) {
-            switch(var->ty->size) {
-                case 1:  println("    mov %s, -%d(%%rbp)", argreg8[i++], var->offset); break;
-                case 2:  println("    mov %s, -%d(%%rbp)", argreg16[i++], var->offset); break;
-                case 4:  println("    mov %s, -%d(%%rbp)", argreg32[i++], var->offset); break;
-                default: println("    mov %s, -%d(%%rbp)", argreg64[i++], var->offset); break;
+            switch (var->ty->size) {
+                case 1:
+                    println("    mov %s, -%d(%%rbp)", argreg8[i++],
+                            var->offset);
+                    break;
+                case 2:
+                    println("    mov %s, -%d(%%rbp)", argreg16[i++],
+                            var->offset);
+                    break;
+                case 4:
+                    println("    mov %s, -%d(%%rbp)", argreg32[i++],
+                            var->offset);
+                    break;
+                default:
+                    println("    mov %s, -%d(%%rbp)", argreg64[i++],
+                            var->offset);
+                    break;
             }
         }
 
@@ -332,4 +311,4 @@ void codegen(Obj *prog, FILE *out) {
     assign_lvar_offset(prog);
     emit_data(prog);
     emit_text(prog);
-} 
+}
