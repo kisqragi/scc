@@ -263,6 +263,11 @@ static Type *declspec(Token **rest, Token *tok) {
     if (equal(tok, "struct"))
         return struct_decl(rest, tok->next);
 
+    if (equal(tok, "void")) {
+        *rest = tok->next;
+        return ty_void;
+    }
+
     if (equal(tok, "char")) {
         *rest = tok->next;
         return ty_char;
@@ -335,6 +340,10 @@ static Node *declaration(Token **rest, Token *tok) {
             tok = skip(tok, ",");
 
         Type *ty = declarator(&tok, tok, basety);
+
+        if (ty->kind == TY_VOID)
+            error_tok(tok, "variable declared 'void'");
+
         Obj *obj = new_lvar(get_ident(ty->name), ty);
 
         if (!equal(tok, "=")) { continue; }
@@ -422,7 +431,8 @@ static Node *stmt(Token **rest, Token *tok) {
 }
 
 static bool is_typename(Token *tok) {
-    return equal(tok, "char") || equal(tok, "int") || equal(tok, "struct");
+    return equal(tok, "char") || equal(tok, "int") ||
+           equal(tok, "struct") || equal(tok, "void");
 }
 
 // compound-stmt = (declaration | stmt)* "}"

@@ -87,6 +87,8 @@ static void gen_addr(Node *node) {
             }
             return;
         case ND_DEREF:
+            if (node->ty->kind == TY_VOID)
+                error_tok(node->tok, "invalid use of void expression");
             gen_expr(node->lhs);
             return;
         case ND_MEMBER:
@@ -114,6 +116,8 @@ static void gen_expr(Node *node) {
             load(node->ty);
             return;
         case ND_DEREF:
+            if (node->ty->kind == TY_VOID)
+                error_tok(node->tok, "invalid use of void expression");
             gen_expr(node->lhs);
             load(node->ty);
             return;

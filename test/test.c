@@ -302,6 +302,8 @@ int main() {
     assert(7, ({ struct t {int a,b;}; struct t x; x.a=7; struct t y, *p=&x, *q=&y; *q=*p; y.a; }), "struct t {int a,b;}; struct t x; x.a=7; struct t y, *p=&x, *q=&y; *q=*p; y.a;");
     assert(5, ({ struct t {char a, b;} x, y; x.a=5; y=x; y.a; }), "struct t {char a, b;} x, y; x.a=5; y=x; y.a;");
 
+    { void *x; }
+
     puts("OK");
     return 0;
 }

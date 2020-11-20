@@ -161,6 +161,7 @@ char *format(char *fmt, ...);
 //
 
 typedef enum  {
+    TY_VOID,
     TY_CHAR,
     TY_INT,
     TY_PTR,
@@ -195,6 +196,7 @@ struct Type {
     Member *members;
 };
 
+extern Type *ty_void;
 extern Type *ty_char;
 extern Type *ty_int;
 
