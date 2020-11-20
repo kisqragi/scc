@@ -734,7 +734,8 @@ static Node *primary(Token **rest, Token *tok) {
     if (tok->kind == TK_STR) {
         int len  = strlen(tok->str) + 1; // terminating '\0'
         Obj *var = new_string_literal(tok->str, array_of(ty_char, len));
-        *rest    = tok->next;
+
+        *rest = tok->next;
         return new_var_node(var, tok);
     }
 

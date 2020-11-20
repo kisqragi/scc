@@ -1,4 +1,7 @@
 #include "scc.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 // Input filename
 static char *current_filename;
@@ -203,6 +206,21 @@ static Token *read_string_literal(char *start) {
     return tok;
 }
 
+static Token *concat_string_literal(Token *tok) {
+    Token *t = tok;
+    while (t) {
+        if (t->kind == TK_STR && t->next->kind == TK_STR) {
+            int len   = strlen(t->str) + strlen(t->next->str) + 1;
+            char *str = calloc(len, sizeof(char));
+            sprintf(str, "%s%s", t->str, t->next->str);
+            t->str  = str;
+            t->next = t->next->next;
+            t->len  = t->len + t->next->len;
+        }
+        t = t->next;
+    }
+}
+
 static void add_lineno(Token *tok) {
     char *p     = current_input;
     int line_no = 1;
@@ -288,6 +306,7 @@ static Token *tokenize(char *filename, char *p) {
     cur = cur->next = new_token(TK_EOF, p, p);
     add_lineno(head.next);
     convert_keywords(head.next);
+    concat_string_literal(head.next);
     return head.next;
 }
 
