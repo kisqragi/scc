@@ -17,6 +17,7 @@ static void println(char *fmt, ...) {
 static int depth;
 static Obj *current_fn;
 static char *argreg8[] = {"%dil", "%sil", "%dl", "%cl", "%r8b", "%r9b"};
+static char *argreg16[] = {"%di", "%si", "%dx", "%cx", "%r8w", "%r9w"};
 static char *argreg32[] = {"%edi", "%esi", "%edx", "%ecx", "%r8d", "%r9d"};
 static char *argreg64[] = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"};
 
@@ -47,12 +48,12 @@ static void load(Type *ty) {
         return;
     }
 
-    if (ty->size == 1)
-        println("    movsbq (%%rax), %%rax");
-    else if (ty->size == 4)
-        println("    movsxd (%%rax), %%rax");
-    else
-        println("    mov (%%rax), %%rax");
+    switch (ty->size) {
+        case 1:  println("    movsbq (%%rax), %%rax"); break;
+        case 2:  println("    movswq (%%rax), %%rax"); break;
+        case 4:  println("    movsxd (%%rax), %%rax"); break;
+        default: println("    mov (%%rax), %%rax"); break;
+    }
 }
 
 // Store %rax to an address that the stack top is pointing to.
@@ -67,12 +68,12 @@ static void store(Type *ty) {
         return;
     }
 
-    if (ty->size == 1)
-        println("    mov %%al, (%%rdi)");
-    else if (ty->size == 4)
-        println("    mov %%eax, (%%rdi)");
-    else
-        println("    mov %%rax, (%%rdi)");
+    switch (ty->size) {
+        case 1:  println("    mov %%al, (%%rdi)"); break;
+        case 2:  println("    mov %%ax, (%%rdi)"); break;
+        case 4:  println("    mov %%eax, (%%rdi)"); break;
+        default: println("    mov %%rax, (%%rdi)"); break;
+    }
 }
 
 static void gen_addr(Node *node) {
@@ -306,12 +307,12 @@ static void emit_text(Obj *prog) {
         // Save passed-by-register arguments to the stack
         int i = 0;
         for (Obj *var = fn->params; var; var = var->next) {
-            if (var->ty->size == 1)
-                println("    mov %s, -%d(%%rbp)", argreg8[i++], var->offset);
-            else if (var->ty->size == 4)
-                println("    mov %s, -%d(%%rbp)", argreg32[i++], var->offset);
-            else
-                println("    mov %s, -%d(%%rbp)", argreg64[i++], var->offset);
+            switch(var->ty->size) {
+                case 1:  println("    mov %s, -%d(%%rbp)", argreg8[i++], var->offset); break;
+                case 2:  println("    mov %s, -%d(%%rbp)", argreg16[i++], var->offset); break;
+                case 4:  println("    mov %s, -%d(%%rbp)", argreg32[i++], var->offset); break;
+                default: println("    mov %s, -%d(%%rbp)", argreg64[i++], var->offset); break;
+            }
         }
 
         // Emit code

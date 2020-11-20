@@ -303,9 +303,10 @@ int main() {
     assert(5, ({ struct t {char a, b;} x, y; x.a=5; y=x; y.a; }), "struct t {char a, b;} x, y; x.a=5; y=x; y.a;");
 
     assert(8, ({ long a; sizeof(a); }), "long a; sizeof(a);");
-
     assert(9223372036854775807, ({ long a = 9223372036854775807; a; }), "long a = 9223372036854775807; a;");
     assert(-1, ({ int a = 9223372036854775807; a; }), "int a = 9223372036854775807; a;");
+
+    assert(2, ({ short a; sizeof(a); }), "short a; sizeof(a);");
 
     { void *x; }
 

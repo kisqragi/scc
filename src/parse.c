@@ -273,6 +273,11 @@ static Type *declspec(Token **rest, Token *tok) {
         return ty_char;
     }
 
+    if (equal(tok, "short")) {
+        *rest = tok->next;
+        return ty_short;
+    }
+
     if (equal(tok, "long")) {
         *rest = tok->next;
         return ty_long;
@@ -439,7 +444,7 @@ static Node *stmt(Token **rest, Token *tok) {
 static bool is_typename(Token *tok) {
     return equal(tok, "char") || equal(tok, "int") ||
            equal(tok, "struct") || equal(tok, "void") ||
-           equal(tok, "long");
+           equal(tok, "long") || equal(tok, "short");
 }
 
 // compound-stmt = (declaration | stmt)* "}"
