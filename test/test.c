@@ -1237,6 +1237,16 @@ int main() {
            strlen("ab"
                   "cd"),
            "strlen(\"ab\"\"cd\")");
+    assert(7,
+           sizeof("ab"
+                  "cd"
+                  "ef"),
+           "sizeof(\"ab\"\"cd\"\"ef\")");
+    assert(6,
+           strlen("ab"
+                  "cd"
+                  "ef"),
+           "strlen(\"ab\"\"cd\"\"ef\")");
 
     { void *x; }
 

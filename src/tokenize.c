@@ -216,6 +216,7 @@ static Token *concat_string_literal(Token *tok) {
             t->str  = str;
             t->next = t->next->next;
             t->len  = t->len + t->next->len;
+            continue;
         }
         t = t->next;
     }
