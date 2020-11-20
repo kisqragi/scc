@@ -1,10 +1,10 @@
 int printf();
 
-int assert(int expected, int actual, char *code) {
+int assert(long expected, long actual, char *code) {
     if (expected == actual)
-        printf("%s => %d\n", code, actual);
+        printf("%s => %ld\n", code, actual);
     else {
-        printf("%s => %d expected, but got %d\n", code, expected, actual);
+        printf("%s => %ld expected, but got %ld\n", code, expected, actual);
         exit(1);
     }
 }
@@ -301,6 +301,11 @@ int main() {
     assert(7, ({ struct t {int a,b;}; struct t x; x.a=7; struct t y; struct t *z=&y; *z=x; y.a; }), "struct t {int a,b;}; struct t x; x.a=7; struct t y; struct t *z=&y; *z=x; y.a;");
     assert(7, ({ struct t {int a,b;}; struct t x; x.a=7; struct t y, *p=&x, *q=&y; *q=*p; y.a; }), "struct t {int a,b;}; struct t x; x.a=7; struct t y, *p=&x, *q=&y; *q=*p; y.a;");
     assert(5, ({ struct t {char a, b;} x, y; x.a=5; y=x; y.a; }), "struct t {char a, b;} x, y; x.a=5; y=x; y.a;");
+
+    assert(8, ({ long a; sizeof(a); }), "long a; sizeof(a);");
+
+    assert(9223372036854775807, ({ long a = 9223372036854775807; a; }), "long a = 9223372036854775807; a;");
+    assert(-1, ({ int a = 9223372036854775807; a; }), "int a = 9223372036854775807; a;");
 
     { void *x; }
 

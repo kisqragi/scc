@@ -112,7 +112,7 @@ static Node *new_unary(NodeKind kind, Node *expr, Token *tok) {
     return node;
 }
 
-static Node *new_num(int val, Token *tok) {
+static Node *new_num(long val, Token *tok) {
     Node *node = new_node(ND_NUM, tok);
     node->val = val;
     return node;
@@ -158,7 +158,7 @@ static Obj *new_string_literal(char *p, Type *ty) {
     return var;
 }
 
-static int get_number(Token *tok) {
+static long get_number(Token *tok) {
     if (tok->kind != TK_NUM)
         error_tok(tok, "expected an identifier");
     return tok->val;
@@ -257,7 +257,7 @@ static Node *struct_ref(Node *node, Token *tok) {
     return n;
 }
 
-// declspec = "char" | "int" | "struct" struct-decl
+// declspec = "char" | "int" | "long" | "struct" struct-decl
 static Type *declspec(Token **rest, Token *tok) {
 
     if (equal(tok, "struct"))
@@ -272,6 +272,12 @@ static Type *declspec(Token **rest, Token *tok) {
         *rest = tok->next;
         return ty_char;
     }
+
+    if (equal(tok, "long")) {
+        *rest = tok->next;
+        return ty_long;
+    }
+
     *rest = skip(tok, "int");
     return ty_int;
 }
@@ -432,7 +438,8 @@ static Node *stmt(Token **rest, Token *tok) {
 
 static bool is_typename(Token *tok) {
     return equal(tok, "char") || equal(tok, "int") ||
-           equal(tok, "struct") || equal(tok, "void");
+           equal(tok, "struct") || equal(tok, "void") ||
+           equal(tok, "long");
 }
 
 // compound-stmt = (declaration | stmt)* "}"

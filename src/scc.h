@@ -31,7 +31,7 @@ typedef struct Token Token;
 struct Token {
     TokenKind kind;
     Token *next;
-    int val;
+    long val;
     char *loc;
     int len;
     char *str;      // String literal contents including terminating '\0'
@@ -128,7 +128,7 @@ struct Node {
     Node *inc;
 
     Obj *var;   // Used if kind == ND_VAR
-    int val;    // Used if kind == ND_NUM
+    long val;    // Used if kind == ND_NUM
 
     // Struct
     Member *member;
@@ -164,6 +164,7 @@ typedef enum  {
     TY_VOID,
     TY_CHAR,
     TY_INT,
+    TY_LONG,
     TY_PTR,
     TY_FUNC,
     TY_ARRAY,
@@ -199,6 +200,7 @@ struct Type {
 extern Type *ty_void;
 extern Type *ty_char;
 extern Type *ty_int;
+extern Type *ty_long;
 
 bool is_integer(Type *ty);
 bool is_pointer(Type *ty);

@@ -3,10 +3,12 @@
 
 Type *ty_void = &(Type){TY_VOID, 1, 1};
 Type *ty_char = &(Type){TY_CHAR, 1, 1};
-Type *ty_int = &(Type){TY_INT, 4, 4};
+Type *ty_int  = &(Type){TY_INT, 4, 4};
+Type *ty_long = &(Type){TY_LONG, 8, 8};
 
 bool is_integer(Type *ty) {
-    return ty->kind == TY_CHAR || ty->kind == TY_INT;
+    return ty->kind == TY_CHAR || ty->kind == TY_INT ||
+           ty->kind == TY_LONG;
 }
 
 bool is_pointer(Type *ty) {
@@ -82,7 +84,7 @@ void add_type(Node *node) {
         case ND_LE:
         case ND_NUM:
         case ND_FUNCALL:
-            node->ty = ty_int;
+            node->ty = ty_long;
             return;
         case ND_VAR:
             node->ty = node->var->ty;
