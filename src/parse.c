@@ -67,6 +67,7 @@ static Node *postfix(Token **rest, Token *tok);
 static Node *primary(Token **rest, Token *tok);
 
 static char *get_ident(Token *tok);
+static bool is_typename(Token *tok);
 
 // find a local variable by name.
 static Obj *find_var(Token *tok) {
@@ -245,30 +246,46 @@ static Node *struct_ref(Node *node, Token *tok) {
 
 // declspec = "char" | "int" | "long" | "struct" struct-decl
 static Type *declspec(Token **rest, Token *tok) {
-    if (equal(tok, "struct")) return struct_decl(rest, tok->next);
+    enum {
+        VOID  = 1 << 0,
+        CHAR  = 1 << 2,
+        SHORT = 1 << 4,
+        INT   = 1 << 6,
+        LONG  = 1 << 8,
+        OTHER = 1 << 10,
+    };
 
-    if (equal(tok, "void")) {
-        *rest = tok->next;
-        return ty_void;
+    int counter = 0;
+
+    while (is_typename(tok)) {
+        if (equal(tok, "struct")) { return struct_decl(rest, tok->next); }
+
+        if (equal(tok, "void"))
+            counter += VOID;
+        else if (equal(tok, "char"))
+            counter += CHAR;
+        else if (equal(tok, "short"))
+            counter += SHORT;
+        else if (equal(tok, "int"))
+            counter += INT;
+        else if (equal(tok, "long"))
+            counter += LONG;
+        tok = tok->next;
     }
 
-    if (equal(tok, "char")) {
-        *rest = tok->next;
-        return ty_char;
+    *rest = tok;
+    switch (counter) {
+        case VOID: return ty_void;
+        case CHAR: return ty_char;
+        case SHORT:
+        case SHORT + INT: return ty_short;
+        case INT: return ty_int;
+        case LONG:
+        case LONG + LONG:
+        case LONG + INT:
+        case LONG + LONG + INT: return ty_long;
+        default: error_tok(tok, "invalid type");
     }
-
-    if (equal(tok, "short")) {
-        *rest = tok->next;
-        return ty_short;
-    }
-
-    if (equal(tok, "long")) {
-        *rest = tok->next;
-        return ty_long;
-    }
-
-    *rest = skip(tok, "int");
-    return ty_int;
 }
 
 // func-params = (param ("," param)*)*)? ")"

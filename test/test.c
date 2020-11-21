@@ -1248,6 +1248,95 @@ int main() {
                   "ef"),
            "strlen(\"ab\"\"cd\"\"ef\")");
 
+    assert(2, ({
+               short int x;
+               sizeof(x);
+           }),
+           "short int x; sizeof(x);");
+
+    assert(8, ({
+               long int x;
+               sizeof(x);
+           }),
+           "long int x; sizeof(x);");
+    assert(8, ({
+               int long x;
+               sizeof(x);
+           }),
+           "int long x; sizeof(x);");
+
+    assert(1, ({
+               char x;
+               sizeof(x);
+           }),
+           "char x; sizeof(x);");
+    assert(2, ({
+               short int x;
+               sizeof(x);
+           }),
+           "short int x; sizeof(x);");
+    assert(2, ({
+               int short x;
+               sizeof(x);
+           }),
+           "int short x; sizeof(x);");
+    assert(4, ({
+               int x;
+               sizeof(x);
+           }),
+           "int x; sizeof(x);");
+    assert(8, ({
+               long int x;
+               sizeof(x);
+           }),
+           "long int x; sizeof(x);");
+    assert(8, ({
+               int long x;
+               sizeof(x);
+           }),
+           "int long x; sizeof(x);");
+
+    assert(8, ({
+               long a;
+               sizeof(a);
+           }),
+           "long a; sizeof(a);");
+    assert(8, ({
+               long int b;
+               sizeof(b);
+           }),
+           "long int b; sizeof(b);");
+    assert(8, ({
+               int long c;
+               sizeof(c);
+           }),
+           "int long c; sizeof(c);");
+    assert(2, ({
+               short d;
+               sizeof(d);
+           }),
+           "short d; sizeof(d);");
+    assert(2, ({
+               short int e;
+               sizeof(e);
+           }),
+           "short int e; sizeof(e);");
+    assert(2, ({
+               int short f;
+               sizeof(f);
+           }),
+           "int short f; sizeof(f);");
+    assert(8, ({
+               long long g;
+               sizeof(g);
+           }),
+           "long long g; sizeof(g);");
+    assert(8, ({
+               long long int h;
+               sizeof(h);
+           }),
+           "long long int h; sizeof(h);");
+
     { void *x; }
 
     puts("OK");
