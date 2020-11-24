@@ -1,7 +1,7 @@
 # scc is small C compiler
 
 ```
-program        = (function-definition | global-variable)*
+program        = (typedef | function-definition | global-variable)*
 stmt           = "return" expr ";"
                | "if" "(" expr ")" stmt ("else" stmt)?
                | "for" "(" expr-stmt expr? ";" expr? ")" stmt
@@ -15,9 +15,9 @@ type-suffix    = "(" func-params
                | ε
 func-params    = (param ("," param)*)*)? ")"
 param          = declspec declarator
-declspec       = "char" | "int" | "struct" struct-decl
+declspec       = ("char" | "int" | "long" | "struct" struct-decl | typedef-name)+
 struct-decl    = ident? "{" struct-members
-struct-members =(declspec declarator ("," declarator)* ";")*
+struct-members = (declspec declarator ("," declarator)* ";")*
 declarator     = "*"* ident type-suffix
 expr-stmt      = expr? ";"
 expr           = assign

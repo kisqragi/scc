@@ -1337,6 +1337,63 @@ int main() {
            }),
            "long long int h; sizeof(h);");
 
+    assert(1, ({
+               typedef int t;
+               t x = 1;
+               x;
+           }),
+           "typedef int t; t x = 1; x;");
+    assert(1, ({
+               typedef struct {
+                   int a;
+               } t;
+               t x;
+               x.a = 1;
+               x.a;
+           }),
+           "typedef struct { int a; } t; t x; x.a = 1; x.a;");
+    assert(1, ({
+               typedef int t;
+               t t = 1;
+               t;
+           }),
+           "typedef int t; t t = 1; t;");
+    assert(
+        2, ({
+            typedef struct {
+                int a;
+            } t;
+            { typedef int t; }
+            t x;
+            x.a = 2;
+            x.a;
+        }),
+        "typedef struct { int a; } t; { typedef int t; } t x; x.a = 2; x.a;");
+    assert(4, ({
+               typedef t;
+               t x;
+               sizeof(x);
+           }),
+           "typedef t; t x; sizeof(x);");
+    assert(4, ({
+               int typedef t;
+               t x;
+               sizeof(x);
+           }),
+           "int typedef t; t x; sizeof(x);");
+    assert(8, ({
+               long typedef t;
+               t x;
+               sizeof(x);
+           }),
+           "long typedef t; t x; sizeof(x);");
+    assert(8, ({
+               long long typedef int t;
+               t x;
+               sizeof(x);
+           }),
+           "long long typedef int t; t x; sizeof(x);");
+
     { void *x; }
 
     puts("OK");

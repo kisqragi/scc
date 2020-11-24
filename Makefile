@@ -16,7 +16,6 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c $(SRCDIR)/scc.h
 all: clean $(TARGET)
 
 test: $(TARGET)
-	clang-format -i */*.c
 	./bin/scc test/test.c -o ./bin/tmp.s
 	gcc -static -o ./bin/tmp ./bin/tmp.s
 	./bin/tmp
