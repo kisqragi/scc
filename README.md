@@ -25,7 +25,8 @@ assign              = equality ("=" assign)?
 equality            = relational ("==" relational | "!=" relational)*
 relational          = add ("<" add | "<=" add | ">" add | ">=" add)*
 add                 = mul ("+" mul | "-" mul)*
-mul                 = unary ("*" unary | "/" unary)*
+mul                 = cast ("*" cast | "/" unary)*
+cast                = "(" typename ")" cast | unary
 abstract-declarator = "*"* type-suffix
 unary               = ("+" | "-" | "&" | "*") unary
                     | "sizeof" "( typename )"

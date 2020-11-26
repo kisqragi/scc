@@ -94,6 +94,38 @@ static void gen_addr(Node *node) {
     }
 }
 
+static int get_typeid(Type *ty) {
+    enum { I8, I16, I32, I64 };
+    switch (ty->kind) {
+        case TY_CHAR: return I8;
+        case TY_SHORT: return I16;
+        case TY_INT: return I32;
+        default: return I64;
+    }
+}
+
+static char i32i8[]  = "movsbl %al, %eax";
+static char i32i16[] = "movswl %ax, %eax";
+static char i32i64[] = "movsxd %eax, %rax";
+static char i64i32[] = "cdqe";
+
+static char *cast_table[][4] = {
+    // i8    i16     i32     i64
+    {NULL, NULL, NULL, i32i64},    // i8
+    {i32i8, NULL, NULL, i32i64},   // i16
+    {i32i8, i32i16, NULL, i32i64}, // i32
+    {i32i8, i32i16, i64i32, NULL}, // i64
+};
+
+static void cast(Type *from, Type *to) {
+    if (to->kind == TY_VOID) return;
+
+    int t1 = get_typeid(from);
+    int t2 = get_typeid(to);
+
+    if (cast_table[t1][t2]) println("    %s", cast_table[t1][t2]);
+}
+
 static void gen_expr(Node *node) {
     println("    .loc 1 %d", node->tok->line_no);
 
@@ -127,6 +159,10 @@ static void gen_expr(Node *node) {
         case ND_MEMBER:
             gen_addr(node);
             load(node->member->ty);
+            return;
+        case ND_CAST:
+            gen_expr(node->lhs);
+            cast(node->lhs->ty, node->ty);
             return;
         case ND_STMT_EXPR:
             for (Node *n = node->body; n; n = n->next)

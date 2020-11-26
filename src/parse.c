@@ -69,6 +69,7 @@ static Node *equality(Token **rest, Token *tok);
 static Node *relational(Token **rest, Token *tok);
 static Node *add(Token **rest, Token *tok);
 static Node *mul(Token **rest, Token *tok);
+static Node *cast(Token **rest, Token *tok);
 static Node *unary(Token **rest, Token *tok);
 static Node *postfix(Token **rest, Token *tok);
 static Node *primary(Token **rest, Token *tok);
@@ -682,19 +683,19 @@ static Node *add(Token **rest, Token *tok) {
     }
 }
 
-// mul = unary ("*" unary | "/" unary)*
+// mul = cast ("*" cast | "/" unary)*
 static Node *mul(Token **rest, Token *tok) {
-    Node *node = unary(&tok, tok);
+    Node *node = cast(&tok, tok);
 
     for (;;) {
         Token *start = tok;
 
         if (equal(tok, "*")) {
-            node = new_binary(ND_MUL, node, unary(&tok, tok->next), start);
+            node = new_binary(ND_MUL, node, cast(&tok, tok->next), start);
             continue;
         }
         if (equal(tok, "/")) {
-            node = new_binary(ND_DIV, node, unary(&tok, tok->next), start);
+            node = new_binary(ND_DIV, node, cast(&tok, tok->next), start);
             continue;
         }
 
@@ -703,28 +704,45 @@ static Node *mul(Token **rest, Token *tok) {
     }
 }
 
-// unary = ("+" | "-" | "&" | "*") unary
-//       | "sizeof" unary
+static Type *typename(Token **rest, Token *tok) {
+    Type *ty = declspec(&tok, tok, NULL);
+    return abstract_declarator(rest, tok, ty);
+}
+
+// cast = "(" typename ")" cast | unary
+static Node *cast(Token **rest, Token *tok) {
+    if (equal(tok, "(") && is_typename(tok->next)) {
+        Type *ty   = typename(&tok, tok->next);
+        tok        = skip(tok, ")");
+        Node *expr = cast(rest, tok);
+        add_type(expr);
+        Node *node = new_unary(ND_CAST, expr, tok);
+        node->ty   = copy_type(ty);
+        return node;
+    }
+    return unary(rest, tok);
+}
+
+// unary = ("+" | "-" | "&" | "*") cast
+//       | "sizeof" cast
 //       | "sizeof" "( typename )"
 //       | postfix
 static Node *unary(Token **rest, Token *tok) {
-    if (equal(tok, "+")) return unary(rest, tok->next);
+    if (equal(tok, "+")) return cast(rest, tok->next);
 
-    if (equal(tok, "-")) return new_unary(ND_NEG, unary(rest, tok->next), tok);
+    if (equal(tok, "-")) return new_unary(ND_NEG, cast(rest, tok->next), tok);
 
-    if (equal(tok, "&")) return new_unary(ND_ADDR, unary(rest, tok->next), tok);
+    if (equal(tok, "&")) return new_unary(ND_ADDR, cast(rest, tok->next), tok);
 
-    if (equal(tok, "*"))
-        return new_unary(ND_DEREF, unary(rest, tok->next), tok);
+    if (equal(tok, "*")) return new_unary(ND_DEREF, cast(rest, tok->next), tok);
 
     if (equal(tok, "sizeof")) {
         if (equal(tok->next, "(") && is_typename(tok->next->next)) {
-            Type *ty = declspec(&tok, tok->next->next, NULL);
-            ty       = abstract_declarator(&tok, tok, ty);
+            Type *ty = typename(&tok, tok->next->next);
             *rest    = skip(tok, ")");
             return new_num(ty->size, tok);
         } else {
-            Node *node = unary(rest, tok->next);
+            Node *node = cast(rest, tok->next);
             add_type(node);
             return new_num(node->ty->size, tok);
         }
