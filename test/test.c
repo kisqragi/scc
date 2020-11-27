@@ -1401,7 +1401,7 @@ int main() {
     assert(4, sizeof(int), "sizeof(int)");
     assert(8, sizeof(long), "sizeof(long)");
     assert(8, sizeof(long int), "sizeof(long int)");
-    assert(8, sizeof(long int), "sizeof(long int)");
+    assert(8, sizeof(long long int), "sizeof(long long int)");
     assert(8, sizeof(char *), "sizeof(char *)");
     assert(8, sizeof(int *), "sizeof(int *)");
     assert(8, sizeof(long *), "sizeof(long *)");
@@ -1436,6 +1436,118 @@ int main() {
            "int x=5; long y=(long)&x; *(int*)y;");
 
     (void)1;
+
+    assert(0, ({
+               int x[4];
+               x[0] = 0;
+               x[1] = 1;
+               x[2] = 2;
+               x[3] = 3;
+               x[0];
+           }),
+           "int x[4]; x[0]=0; x[1]=1; x[2]=2; x[3]=3; x[0];");
+    assert(1, ({
+               int x[4];
+               x[0] = 0;
+               x[1] = 1;
+               x[2] = 2;
+               x[3] = 3;
+               x[1];
+           }),
+           "int x[4]; x[0]=0; x[1]=1; x[2]=2; x[3]=3; x[1];");
+    assert(2, ({
+               int x[4];
+               x[0] = 0;
+               x[1] = 1;
+               x[2] = 2;
+               x[3] = 3;
+               x[2];
+           }),
+           "int x[4]; x[0]=0; x[1]=1; x[2]=2; x[3]=3; x[2];");
+    assert(3, ({
+               int x[4];
+               x[0] = 0;
+               x[1] = 1;
+               x[2] = 2;
+               x[3] = 3;
+               x[3];
+           }),
+           "int x[4]; x[0]=0; x[1]=1; x[2]=2; x[3]=3; x[3];");
+
+    assert(0, ({
+               int x[2][2];
+               x[0][0] = 0;
+               x[0][1] = 1;
+               x[0][0];
+           }),
+           "int x[2][2]; x[0][0]=0; x[0][1]=1; x[0][0];");
+    assert(1, ({
+               int x[2][2];
+               x[0][0] = 0;
+               x[0][1] = 1;
+               x[0][1];
+           }),
+           "int x[2][2]; x[0][0]=0; x[0][1]=1; x[0][1];");
+    assert(0, ({
+               int x[2][2];
+               x[1][0] = 0;
+               x[1][1] = 1;
+               x[1][0];
+           }),
+           "int x[2][2]; x[1][0]=0; x[1][1]=1; x[1][0];");
+    assert(1, ({
+               int x[2][2];
+               x[1][0] = 0;
+               x[1][1] = 1;
+               x[1][1];
+           }),
+           "int x[2][2]; x[1][0]=0; x[1][1]=1; x[1][1];");
+
+    assert(16, sizeof(struct {
+               char a;
+               short b;
+               int c;
+               long d;
+           }),
+           "sizeof(struct { char a; short b; int c; long d; })");
+    assert(16, sizeof(struct {
+               long a;
+               int b;
+               short c;
+               char d;
+           }),
+           "sizeof(struct { long a; int b; short c; char d; })");
+
+    assert(1, ({
+               struct {
+                   char a;
+               } x;
+               x.a = 1;
+               x.a;
+           }),
+           "struct { char a; }x; x.a=1; x.a;");
+    assert(1, ({
+               struct t {
+                   char a;
+               };
+               struct t x, *y;
+               x.a = 1;
+               y   = &x;
+               y->a;
+           }),
+           "struct t { char a; }; struct t x, *y; x.a=1; y=&x; y->a;");
+
+    assert(-1, ({
+        long a = -1;
+        (int)a;
+    }),
+           "long a = -1; (int)a;");
+
+    printf("string literal\n");
+    printf("string"
+           " literal"
+           "\n");
+    printf("\"string literal\"\n");
 
     puts("OK");
     return 0;
