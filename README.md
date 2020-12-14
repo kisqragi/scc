@@ -15,7 +15,7 @@ type-suffix         = "(" func-params
                     | ε
 func-params         = (param ("," param)*)*)? ")"
 param               = declspec declarator
-declspec            = ("char" | "int" | "long" | "struct" struct-decl | typedef-name)+
+declspec            = ("void" | "_Bool" | "char" | "int" | "long" | "struct" struct-decl | typedef-name)+
 struct-decl         = ident? "{" struct-members
 struct-members      = (declspec declarator ("," declarator)* ";")*
 declarator          = "*"* ident type-suffix

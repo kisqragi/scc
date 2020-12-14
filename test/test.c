@@ -1576,6 +1576,28 @@ int main() {
            }),
            "short a=1; long b=0; sizeof(a+b);");
 
+    assert(0, (_Bool)0, "(_Bool)0");
+    assert(1, (_Bool)1, "(_Bool)1");
+    assert(1, (_Bool)2, "(_Bool)2");
+    assert(1, (_Bool)-1, "(_Bool)-1");
+    assert(0, (_Bool)(char)256, "(_Bool)(char)256");
+    assert(0, ({
+               _Bool x = 0;
+               x;
+           }),
+           "_Bool x=0; x;");
+    assert(1, ({
+               _Bool x = 1;
+               x;
+           }),
+           "_Bool x=1; x;");
+    assert(1, ({
+               _Bool x = 2;
+               x;
+           }),
+           "_Bool x=2; x;");
+    assert(1, sizeof(_Bool), "sizeof(_Bool)");
+
     puts("OK");
     return 0;
 }

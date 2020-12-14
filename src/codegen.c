@@ -120,6 +120,17 @@ static char *cast_table[][4] = {
 static void cast(Type *from, Type *to) {
     if (to->kind == TY_VOID) return;
 
+    if (to->kind == TY_BOOL) {
+        if (from->size == 8)
+            println("    cmp $0, %%rax");
+        else
+            println("    cmp $0, %%eax");
+
+        println("    setne %%al");
+        println("    movzb %%al, %%rax");
+        return;
+    }
+
     int t1 = get_typeid(from);
     int t2 = get_typeid(to);
 

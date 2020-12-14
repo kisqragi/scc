@@ -140,8 +140,8 @@ static Node *new_num(long val, Token *tok) {
 
 static Node *new_long(long val, Token *tok) {
     Node *node = new_node(ND_NUM, tok);
-    node->val = val;
-    node->ty = ty_long;
+    node->val  = val;
+    node->ty   = ty_long;
     return node;
 }
 
@@ -276,15 +276,17 @@ static Node *struct_ref(Node *node, Token *tok) {
     return n;
 }
 
-// declspec = ("char" | "int" | "long" | "struct" struct-decl | typedef-name)+
+// declspec = ("void" | "_Bool" | "char" | "int" | "long" | "struct" struct-decl
+// | typedef-name)+
 static Type *declspec(Token **rest, Token *tok, VarAttr *attr) {
     enum {
         VOID  = 1 << 0,
-        CHAR  = 1 << 2,
-        SHORT = 1 << 4,
-        INT   = 1 << 6,
-        LONG  = 1 << 8,
-        OTHER = 1 << 10,
+        BOOL  = 1 << 2,
+        CHAR  = 1 << 4,
+        SHORT = 1 << 6,
+        INT   = 1 << 8,
+        LONG  = 1 << 10,
+        OTHER = 1 << 12,
     };
 
     int counter = 0;
@@ -310,6 +312,8 @@ static Type *declspec(Token **rest, Token *tok, VarAttr *attr) {
         if (equal(tok, "struct")) return struct_decl(rest, tok->next);
         if (equal(tok, "void"))
             counter += VOID;
+        else if (equal(tok, "_Bool"))
+            counter += BOOL;
         else if (equal(tok, "char"))
             counter += CHAR;
         else if (equal(tok, "short"))
@@ -324,6 +328,7 @@ static Type *declspec(Token **rest, Token *tok, VarAttr *attr) {
     *rest = tok;
     switch (counter) {
         case VOID: return ty_void;
+        case BOOL: return ty_bool;
         case CHAR: return ty_char;
         case SHORT:
         case SHORT + INT: return ty_short;
@@ -495,7 +500,7 @@ static Node *stmt(Token **rest, Token *tok) {
 
 static bool is_typename(Token *tok) {
     char *kw[] = {
-        "char", "int", "struct", "void", "long", "short", "typedef",
+        "char", "int", "struct", "void", "long", "short", "typedef", "_Bool",
     };
 
     for (int i = 0; i < sizeof(kw) / sizeof(kw[0]); i++)
@@ -728,10 +733,10 @@ static Type *typename(Token **rest, Token *tok) {
 static Node *cast(Token **rest, Token *tok) {
     if (equal(tok, "(") && is_typename(tok->next)) {
         Token *start = tok;
-        Type *ty   = typename(&tok, tok->next);
-        tok        = skip(tok, ")");
-        Node *node = new_cast(cast(rest, tok), ty);
-        node->tok = tok;
+        Type *ty     = typename(&tok, tok->next);
+        tok          = skip(tok, ")");
+        Node *node   = new_cast(cast(rest, tok), ty);
+        node->tok    = tok;
         return node;
     }
     return unary(rest, tok);

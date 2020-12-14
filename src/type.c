@@ -1,6 +1,7 @@
 #include "scc.h"
 
 Type *ty_void  = &(Type){TY_VOID, 1, 1};
+Type *ty_bool  = &(Type){TY_BOOL, 1, 1};
 Type *ty_char  = &(Type){TY_CHAR, 1, 1};
 Type *ty_short = &(Type){TY_SHORT, 2, 2};
 Type *ty_int   = &(Type){TY_INT, 4, 4};
@@ -8,7 +9,7 @@ Type *ty_long  = &(Type){TY_LONG, 8, 8};
 
 bool is_integer(Type *ty) {
     return ty->kind == TY_CHAR || ty->kind == TY_INT || ty->kind == TY_LONG ||
-           ty->kind == TY_SHORT;
+           ty->kind == TY_SHORT || ty->kind == TY_BOOL;
 }
 
 bool is_pointer(Type *ty) { return ty->kind == TY_PTR; }
@@ -46,17 +47,15 @@ Type *array_of(Type *base, int len) {
 }
 
 static Type *get_common_type(Type *ty1, Type *ty2) {
-    if (ty1->base)
-        return pointer_to(ty1->base);
-    if (ty1->size == 8 || ty2->size == 8)
-        return ty_long;
+    if (ty1->base) return pointer_to(ty1->base);
+    if (ty1->size == 8 || ty2->size == 8) return ty_long;
     return ty_int;
 }
 
 static void usual_arith_conv(Node **lhs, Node **rhs) {
     Type *ty = get_common_type((*lhs)->ty, (*rhs)->ty);
-    *lhs = new_cast(*lhs, ty);
-    *rhs = new_cast(*rhs, ty);
+    *lhs     = new_cast(*lhs, ty);
+    *rhs     = new_cast(*rhs, ty);
 }
 
 void add_type(Node *node) {
@@ -85,9 +84,9 @@ void add_type(Node *node) {
             node->ty = node->lhs->ty;
             return;
         case ND_NEG: {
-            Type *ty = get_common_type(ty_int, node->lhs->ty);
+            Type *ty  = get_common_type(ty_int, node->lhs->ty);
             node->lhs = new_cast(node->lhs, ty);
-            node->ty = ty;
+            node->ty  = ty;
             return;
         }
         case ND_ASSIGN:
