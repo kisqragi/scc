@@ -136,6 +136,7 @@ struct Node {
 };
 
 Obj *parse(Token *tok);
+Node *new_cast(Node *expr, Type *ty);
 
 struct Member {
     Member *next;

@@ -43,8 +43,8 @@ static void load(Type *ty) {
     if (ty->kind == TY_ARRAY || ty->kind == TY_STRUCT) { return; }
 
     switch (ty->size) {
-        case 1: println("    movsbq (%%rax), %%rax"); break;
-        case 2: println("    movswq (%%rax), %%rax"); break;
+        case 1: println("    movsbl (%%rax), %%eax"); break;
+        case 2: println("    movswl (%%rax), %%eax"); break;
         case 4: println("    movsxd (%%rax), %%rax"); break;
         default: println("    mov (%%rax), %%rax"); break;
     }

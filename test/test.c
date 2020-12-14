@@ -689,8 +689,8 @@ int main() {
 
     assert(0, ({ "\x00"[0]; }), "\"\\x00\"[0];");
     assert(119, ({ "\x77"[0]; }), "\"\\x77\"[0];");
-    assert(-91, ({ "\xA5"[0]; }), "\"\\xA5\"[0];");
-    assert(-1, ({ "\x00ff"[0]; }), "\"\\x00ff\"[0];");
+    assert(4294967205, ({ "\xA5"[0]; }), "\"\\xA5\"[0];");
+    assert(4294967295, ({ "\x00ff"[0]; }), "\"\\x00ff\"[0];");
     assert(66, ({ "\x4142"[0]; }), "\"\\x4142\"[0];");
     assert(67, ({ "\x414243"[0]; }), "\"\\x414243\"[0];");
 
@@ -1548,6 +1548,33 @@ int main() {
            " literal"
            "\n");
     printf("\"string literal\"\n");
+
+    assert(0, 1073741824 * 100 / 100, "1073741824 * 100 / 100");
+    assert(4, sizeof(1 + 1), "sizeof(1+1)");
+    assert(4, ({
+               char a = 1;
+               char b = 0;
+               sizeof(a + b);
+           }),
+           "char a=1; char b=0; sizeof(a+b);");
+    assert(4, ({
+               char a  = 1;
+               short b = 0;
+               sizeof(a + b);
+           }),
+           "char a=1; short b=0; sizeof(a+b);");
+    assert(4, ({
+               char a = 1;
+               int b  = 0;
+               sizeof(a + b);
+           }),
+           "char a=1; int b=0; sizeof(a+b);");
+    assert(8, ({
+               int a  = 1;
+               long b = 0;
+               sizeof(a + b);
+           }),
+           "short a=1; long b=0; sizeof(a+b);");
 
     puts("OK");
     return 0;

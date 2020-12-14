@@ -124,9 +124,24 @@ static Node *new_unary(NodeKind kind, Node *expr, Token *tok) {
     return node;
 }
 
+Node *new_cast(Node *expr, Type *ty) {
+    add_type(expr);
+
+    Node *node = new_unary(ND_CAST, expr, expr->tok);
+    node->ty   = copy_type(ty);
+    return node;
+}
+
 static Node *new_num(long val, Token *tok) {
     Node *node = new_node(ND_NUM, tok);
     node->val  = val;
+    return node;
+}
+
+static Node *new_long(long val, Token *tok) {
+    Node *node = new_node(ND_NUM, tok);
+    node->val = val;
+    node->ty = ty_long;
     return node;
 }
 
@@ -629,7 +644,7 @@ static Node *new_add(Node *lhs, Node *rhs, Token *tok) {
     }
 
     // ptr + num
-    rhs = new_binary(ND_MUL, rhs, new_num(lhs->ty->base->size, tok), tok);
+    rhs = new_binary(ND_MUL, rhs, new_long(lhs->ty->base->size, tok), tok);
     return new_binary(ND_ADD, lhs, rhs, tok);
 }
 
@@ -643,7 +658,7 @@ static Node *new_sub(Node *lhs, Node *rhs, Token *tok) {
 
     // ptr - num
     if (lhs->ty->base && is_integer(rhs->ty)) {
-        rhs = new_binary(ND_MUL, rhs, new_num(lhs->ty->base->size, tok), tok);
+        rhs = new_binary(ND_MUL, rhs, new_long(lhs->ty->base->size, tok), tok);
         return new_binary(ND_SUB, lhs, rhs, tok);
         // add_type(rhs);
         // Node *node = new_binary(ND_SUB, lhs, rhs, tok);
@@ -712,12 +727,11 @@ static Type *typename(Token **rest, Token *tok) {
 // cast = "(" typename ")" cast | unary
 static Node *cast(Token **rest, Token *tok) {
     if (equal(tok, "(") && is_typename(tok->next)) {
+        Token *start = tok;
         Type *ty   = typename(&tok, tok->next);
         tok        = skip(tok, ")");
-        Node *expr = cast(rest, tok);
-        add_type(expr);
-        Node *node = new_unary(ND_CAST, expr, tok);
-        node->ty   = copy_type(ty);
+        Node *node = new_cast(cast(rest, tok), ty);
+        node->tok = tok;
         return node;
     }
     return unary(rest, tok);
