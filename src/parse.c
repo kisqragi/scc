@@ -57,6 +57,8 @@ static void push_tag_scope(char *name, Type *ty) {
 static Obj *locals;
 static Obj *globals;
 
+static Obj *current_fn;
+
 static Type *declspec(Token **rest, Token *tok, VarAttr *attr);
 static Type *declarator(Token **rest, Token *tok, Type *ty);
 static Node *declaration(Token **rest, Token *tok, Type *basety);
@@ -441,8 +443,10 @@ static Node *declaration(Token **rest, Token *tok, Type *basety) {
 static Node *stmt(Token **rest, Token *tok) {
     if (equal(tok, "return")) {
         Node *node = new_node(ND_RETURN, tok);
-        node->lhs  = expr(&tok, tok->next);
-        *rest      = skip(tok, ";");
+        Node *exp  = expr(&tok, tok->next);
+        add_type(exp);
+        node->lhs = new_cast(exp, current_fn->ty->return_ty);
+        *rest     = skip(tok, ";");
         return node;
     }
 
@@ -736,7 +740,7 @@ static Node *cast(Token **rest, Token *tok) {
         Type *ty     = typename(&tok, tok->next);
         tok          = skip(tok, ")");
         Node *node   = new_cast(cast(rest, tok), ty);
-        node->tok    = tok;
+        node->tok    = start;
         return node;
     }
     return unary(rest, tok);
@@ -763,6 +767,8 @@ static Node *unary(Token **rest, Token *tok) {
         } else {
             Node *node = cast(rest, tok->next);
             add_type(node);
+            fprintf(stderr, "\n\n%.*s\n\n", node->tok->len, node->tok->loc);
+            fprintf(stderr, "\n\n%d\n\n", node->ty->kind);
             return new_num(node->ty->size, tok);
         }
     }
@@ -885,6 +891,8 @@ static Token *funcdef(Token *tok, Type *basety) {
     fn->is_declaration = consume(&tok, tok, ";");
 
     if (fn->is_declaration) return tok;
+
+    current_fn = fn;
 
     locals = NULL;
 

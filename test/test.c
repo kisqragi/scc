@@ -34,6 +34,9 @@ int while_loop() {
 }
 int sub_char(char a, char b, char c) { return a - b - c; }
 
+char int_to_char(int x) { return x; }
+_Bool int_to_bool(int x) { return x; }
+
 int x, y;
 int z[4];
 int a;
@@ -53,6 +56,8 @@ int main() {
     printf("int while_loop() { int i=0; while (1) { if (i>2) return i; i=i+1; "
            "} return 0; }\n");
     printf("int sub_char(char a, char b, char c) { return a-b-c; }\n");
+    printf("char int_to_char(int x) { return x; }");
+    printf("_Bool int_to_bool(int x) { return x; }");
     printf("int x, y;\n");
     printf("int z[4];\n");
     printf("int a;\n");
@@ -1597,6 +1602,9 @@ int main() {
            }),
            "_Bool x=2; x;");
     assert(1, sizeof(_Bool), "sizeof(_Bool)");
+
+    assert(0, int_to_char(256), "int_to_char(256)");
+    assert(1, int_to_bool(256), "int_to_bool(256)");
 
     puts("OK");
     return 0;

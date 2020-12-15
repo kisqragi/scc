@@ -180,6 +180,7 @@ static void gen_expr(Node *node) {
                 gen_stmt(n);
             return;
         case ND_FUNCALL: {
+            fprintf(stderr, "test\n");
             int nargs = 0;
             for (Node *arg = node->args; arg; arg = arg->next) {
                 gen_expr(arg);
