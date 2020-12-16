@@ -767,8 +767,6 @@ static Node *unary(Token **rest, Token *tok) {
         } else {
             Node *node = cast(rest, tok->next);
             add_type(node);
-            fprintf(stderr, "\n\n%.*s\n\n", node->tok->len, node->tok->loc);
-            fprintf(stderr, "\n\n%d\n\n", node->ty->kind);
             return new_num(node->ty->size, tok);
         }
     }
@@ -816,18 +814,28 @@ static Node *funcall(Token **rest, Token *tok) {
     Token *ident = tok;
     tok          = tok->next->next; // eat ident and "(".
 
+    VarScope *sc = find_var(ident);
+    if (!sc)
+        error_tok(ident, "implicit declaration of a function");
+    if (!sc->var || sc->var->ty->kind != TY_FUNC)
+        error_tok(ident, "not a function");
+
+    Type *ty = sc->var->ty->return_ty;
+
     Node head = {};
     Node *cur = &head;
 
     while (!equal(tok, ")")) {
         if (cur != &head) tok = skip(tok, ",");
         cur = cur->next = assign(&tok, tok);
+        add_type(cur);
     }
 
     *rest = skip(tok, ")");
 
     Node *node     = new_node(ND_FUNCALL, ident);
     node->funcname = strndup(ident->loc, ident->len);
+    node->ty = ty;
     node->args     = head.next;
     return node;
 }

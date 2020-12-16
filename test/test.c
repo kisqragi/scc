@@ -1,4 +1,7 @@
 int printf();
+void exit(int status);
+int strlen(char *s);
+int puts(char *s);
 
 int assert(long expected, long actual, char *code) {
     if (expected == actual)
@@ -1605,6 +1608,8 @@ int main() {
 
     assert(0, int_to_char(256), "int_to_char(256)");
     assert(1, int_to_bool(256), "int_to_bool(256)");
+    assert(1, sizeof(int_to_bool(256)), "sizeof(int_to_bool(256))");
+    assert(1, sizeof(int_to_bool(0)), "sizeof(int_to_bool(0))");
 
     puts("OK");
     return 0;
