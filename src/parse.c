@@ -815,27 +815,39 @@ static Node *funcall(Token **rest, Token *tok) {
     tok          = tok->next->next; // eat ident and "(".
 
     VarScope *sc = find_var(ident);
-    if (!sc)
-        error_tok(ident, "implicit declaration of a function");
+
+    if (!sc) error_tok(ident, "implicit declaration of a function");
     if (!sc->var || sc->var->ty->kind != TY_FUNC)
         error_tok(ident, "not a function");
 
-    Type *ty = sc->var->ty->return_ty;
+    Type *ty       = sc->var->ty;
+    Type *param_ty = ty->params;
 
     Node head = {};
     Node *cur = &head;
 
     while (!equal(tok, ")")) {
         if (cur != &head) tok = skip(tok, ",");
-        cur = cur->next = assign(&tok, tok);
-        add_type(cur);
+
+        Node *arg = assign(&tok, tok);
+        add_type(arg);
+
+        if (param_ty) {
+            if (param_ty->kind == TY_STRUCT)
+                error_tok(arg->tok, "passing struct is not supported yet");
+            arg      = new_cast(arg, param_ty);
+            param_ty = param_ty->next;
+        }
+
+        cur = cur->next = arg;
     }
 
     *rest = skip(tok, ")");
 
     Node *node     = new_node(ND_FUNCALL, ident);
     node->funcname = strndup(ident->loc, ident->len);
-    node->ty = ty;
+    node->func_ty  = ty;
+    node->ty       = ty->return_ty;
     node->args     = head.next;
     return node;
 }

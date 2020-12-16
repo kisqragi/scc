@@ -38,6 +38,7 @@ int while_loop() {
 int sub_char(char a, char b, char c) { return a - b - c; }
 
 char int_to_char(int x) { return x; }
+int int_to_char_int(char x) { return x; }
 _Bool int_to_bool(int x) { return x; }
 
 int x, y;
@@ -45,7 +46,6 @@ int z[4];
 int a;
 
 int main() {
-
     printf("\n------ global ----------\n");
     printf("int ret3() { return 3; }\n");
     printf("int ret5() { return 5; }\n");
@@ -60,6 +60,7 @@ int main() {
            "} return 0; }\n");
     printf("int sub_char(char a, char b, char c) { return a-b-c; }\n");
     printf("char int_to_char(int x) { return x; }");
+    printf("int int_to_char_int(char x) { return x; }");
     printf("_Bool int_to_bool(int x) { return x; }");
     printf("int x, y;\n");
     printf("int z[4];\n");
@@ -697,10 +698,10 @@ int main() {
 
     assert(0, ({ "\x00"[0]; }), "\"\\x00\"[0];");
     assert(119, ({ "\x77"[0]; }), "\"\\x77\"[0];");
-    assert(4294967205, ({ "\xA5"[0]; }), "\"\\xA5\"[0];");
-    assert(4294967295, ({ "\x00ff"[0]; }), "\"\\x00ff\"[0];");
-    assert(66, ({ "\x4142"[0]; }), "\"\\x4142\"[0];");
-    assert(67, ({ "\x414243"[0]; }), "\"\\x414243\"[0];");
+    assert(-91, "\xA5"[0], "\"\\xA5\"[0];");
+    assert(-1, "\x00ff"[0], "\"\\x00ff\"[0];");
+    assert(66, "\x4142"[0], "\"\\x4142\"[0];");
+    assert(67, "\x414243"[0], "\"\\x414243\"[0];");
 
     assert(10, ({
                x = 10;
@@ -1610,6 +1611,9 @@ int main() {
     assert(1, int_to_bool(256), "int_to_bool(256)");
     assert(1, sizeof(int_to_bool(256)), "sizeof(int_to_bool(256))");
     assert(1, sizeof(int_to_bool(0)), "sizeof(int_to_bool(0))");
+
+    assert(0, int_to_char_int(256), "int_to_char_int(256)");
+    assert(1, int_to_char_int(257), "int_to_char_int(257)");
 
     puts("OK");
     return 0;
