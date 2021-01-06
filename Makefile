@@ -7,6 +7,7 @@ OBJDIR    = ./obj
 OBJECTS   = $(addprefix $(OBJDIR)/, $(notdir $(SOURCES:.c=.o)))
 
 $(TARGET): $(OBJECTS)
+	-mkdir -p $(TARDIR)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.c $(SRCDIR)/scc.h

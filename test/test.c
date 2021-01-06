@@ -1615,6 +1615,11 @@ int main() {
     assert(0, int_to_char_int(256), "int_to_char_int(256)");
     assert(1, int_to_char_int(257), "int_to_char_int(257)");
 
+    assert(65, 'A', "'A'");
+    assert(66, 'A' + 1, "'A'+1");
+    assert(10, '\n', "'\\n'");
+    assert(-128, '\x80', "'\\x80'");
+
     puts("OK");
     return 0;
 }
